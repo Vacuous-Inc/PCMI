@@ -1,3 +1,7 @@
+'''
+Main Code for creating the Web Interface
+'''
+
 from flask import Flask, render_template, request, make_response
 
 app = Flask(__name__)
@@ -14,6 +18,10 @@ def watch():
 @app.route("/admin", methods=["GET"])
 def admin():
     return render_template("admin_login.html")
+
+@app.route("/join",methods=["GET"])
+def join():
+    return render_template("join.html")
 
 @app.route("/play",methods=["GET"])
 def play():
