@@ -3,9 +3,14 @@ Main Code for creating the Web Interface
 '''
 
 from flask import Flask, render_template, request, make_response
+import Game
+import Camera
+import Physical
+import DatabaseConnection as db
 
 app = Flask(__name__)
 
+data = db.db();
 
 @app.route("/", methods=["GET"])
 def home():
