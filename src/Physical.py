@@ -2,8 +2,9 @@
 Class for interacting with the robotic arm and card shuffler
 '''
 
-from math import sqrt, arctan
+from math import sqrt, atan, acos
 import RPi.GPIO as GPIO
+import math
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -14,6 +15,9 @@ class Robot:
         #variables to store current position - not currently used
         self.baseRotation = 0
         self.armPosition = 0
+
+        #total distance from base to player
+        self.totalLength = 3
 
         #pin definitions
         self.basePin = 15
@@ -26,11 +30,11 @@ class Robot:
         GPIO.setup([self.basePin, self.waistPin, self.shoulderPin, self.elbowPin, self.wristPin], GPIO.OUT)
 
         #declare pins as PWM
-        self.base = GPIO.PWM(self.basePin, 60)
-        self.waist = GPIO.PWM(self.waistPin, 60)
-        self.shoulder = GPIO.PWM(self.shoulderPin, 60)
-        self.elbow = GPIO.PWM(self.elbowPin, 60)
-        self.wrist = GPIO.PWM(self.wristPin, 60)
+        self.base = GPIO.PWM(self.basePin, 50)
+        self.waist = GPIO.PWM(self.waistPin, 50)
+        self.shoulder = GPIO.PWM(self.shoulderPin, 50)
+        self.elbow = GPIO.PWM(self.elbowPin, 50)
+        self.wrist = GPIO.PWM(self.wristPin, 50)
 
         #start PWM and set angle to 0
         self.base.start(0)
@@ -44,16 +48,24 @@ class Robot:
 
     #moves arm to specified distance
     def extend(r,self):
-        self.waist.ChangeDutyCycle()
+        theta = acos(r/self.totalLength)
+
+        dc = (theta/36) + 5
+        dc_ = ((90-theta)/36) + 5
+        
+        self.waist.ChangeDutyCycle(dc)
+        self.shoulder.ChangeDutyCycle(dc*2)
+        self.elbow.ChangeDutyCycle(dc_)
 
     #rotates arm to specified angle
     def rotate(theta,self):
-        self.base.ChangeDutyCycle()
+        dc = (theta/36) + 5
+        self.base.ChangeDutyCycle(dc)
 
     #moves hand to specied point
     def move_to_coords(x,y,self):
         self.extend(sqrt(x**2 + y**2))
-        self.rotate(arctan(y/x))
+        self.rotate(atan(y/x))
 
     #wrap the shuffler
     def shuffle(self):
