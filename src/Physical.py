@@ -4,10 +4,12 @@ Class for interacting with the robotic arm and card shuffler
 
 from math import sqrt, atan, acos
 import RPi.GPIO as GPIO
-import math
+import time
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
+
+#TODO Tune values, fill in some code, unify coordinate system
 
 class Robot:
     def __init__(self):
@@ -46,6 +48,9 @@ class Robot:
         #get our shuffler
         self.shuffler = Shuffler()
 
+        #get our pump
+        self.pump = Pump()
+
     #moves arm to specified distance
     def extend(r,self):
         theta = acos(r/self.totalLength)
@@ -67,6 +72,14 @@ class Robot:
         self.extend(sqrt(x**2 + y**2))
         self.rotate(atan(y/x))
 
+    #moves a card from specified point to specified point
+    def move_card(x1,y1,x2,y2,self):
+        self.move_to_coords(x1,y1)
+        self.pump.pickup()
+
+        self.move_to_coords(x2,y2)
+        self.pump.release()
+
     #wrap the shuffler
     def shuffle(self):
         self.shuffler.shuffle()
@@ -83,4 +96,25 @@ class Shuffler:
 
     #performs one full shuffler
     def shuffle(self):
+        #TODO write real code
         GPIO.output(self.shufflerPin, GPIO.HIGH)
+
+#control the vaccuum punp
+class Pump:
+    def __innit__(self):
+        self.pumpPin = 3
+        self.valvePin = 5
+
+        GPIO.setup(self.pumpPin, GPIO.OUT)
+        GPIO.setup(self.valvePin, GPIO.OUT)
+    
+    def pickup(self):
+        #TODO tune sleep values
+        GPIO.output(self.pumpPin, GPIO.HIGH)
+        GPIO.output(self.valvePin, GPIO.LOW)
+        time.sleep(2)
+        GPIO.output(self.pumpPin, GPIO.LOW)
+        
+
+    def release(self):
+        GPIO.output(self.valvePin, GPIO.HIGH)
