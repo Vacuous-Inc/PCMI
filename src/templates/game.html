@@ -1,9 +1,95 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Play</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!--
+    <link rel="stylesheet" href="static/node_modules/deck-of-cards/css/card.styl">
+-->
+    <link rel="stylesheet" href="static/style/game.css">
+</head>
+<body>
 
-<h1> TEST GAME PAGE </h1>
+    <style>
+        section {
+            float: left;
+            width: 70%;
+            height: 100%;
+        }
+        aside {
+            float: right;
+            width: 27%;
+        }
+    </style>
 
-<!--Page for actually playing in a game-->
 
-<!-- will rely on cookies to dynamically update for logged in player-->
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+      <p class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+        <span class="fs-4">Let's Play</span>
+      </p>
+        <img src="{{img}}" alt="Profile Pic" width="80" height="80"></img>
+    </header>
 
+    
+    <section>
+        <div id="wrapper">
+            <div id="game">
+                <div id="alert" class="alert alert-error hide"><span></span></div>
+                <div id="dealer">
+                <div id="dhand"></div>
+                </div>
+                <div id="player">
+                <div id="phand"></div>
+                </div>
+                <div id="money">
+                <span id="cash">Cash: $<span></span></span>
+                <div id="bank">Winnings: {{balance}}$<span></span></div>
+                </div>
+            </div>
+            </div>
+            <div id="myModal" class="modal hide fade">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>Out of cash!</h3>
+            </div>
+            <div class="modal-body">
+                <p>You ran out of cash, but you spot an ATM nearby. Would you like to withdraw another $1,000 and try your luck again?</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="cancel" class="btn">Nah</a>
+                <a href="#" id="newGame" class="btn btn-primary">Yes!</a>
+            </div>
+            </div>
+    </section>
+
+    <aside>
+        <div>
+            <p>Hello, {{name}}!</p>
+            <a class="button" href="/logout">Logout</a>
+
+            <p id = gameText>waiting...</p>
+            <div class="btn-group-vertical">
+                <div id="actions"></div>
+                <button id="deal" class="btn">Deal!</button>
+                <button id="hit" class="btn" disabled>Hit</button>
+                <button id="stand" class="btn" disabled>Stand</button>
+                <button id="double" class="btn" disabled>Double Down</button>
+                <button id="split" class="btn" disabled>Split</button>
+                <button id="insurance" class="btn" disabled>Insurance</button>
+                <strong>Wager:</strong> $<input id="wager" class="input-small" type="text" />
+            </div>
+        </div>
+    </aside>
+
+
+    <!--
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+    -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/static/game.js"></script>
+</body>
 </html>

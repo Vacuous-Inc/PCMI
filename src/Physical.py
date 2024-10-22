@@ -118,3 +118,10 @@ class Pump:
 
     def release(self):
         GPIO.output(self.valvePin, GPIO.HIGH)
+
+
+
+#Class for handling card recoginition and camera i/o
+class Camera:
+    def __init__(self):
+        pass

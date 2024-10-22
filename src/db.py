@@ -4,6 +4,8 @@ import sqlite3
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
+from sqlite3 import OperationalError as db_error
+
 
 def get_db():
     if "db" not in g:
@@ -25,6 +27,25 @@ def init_db():
 
     with current_app.open_resource("schema.sql") as f:
         db.executescript(f.read().decode("utf8"))
+
+def get_user(user_id):
+    db = get_db()
+    user = db.execute(
+        "SELECT name, email, profile_pic, balance, admin FROM user WHERE id = ?", (user_id,)
+    ).fetchone()
+    return user
+
+def new_user(id_, name, email, profile_pic):
+    db = get_db()
+    db.execute(
+        "INSERT INTO user (id, name, email, profile_pic, balance, admin) "
+        "VALUES (?, ?, ?, ?, ?, ?)", (id_, name, email, profile_pic, 1000, 0)
+    )
+    db.commit()
+
+def is_admin(user_id):
+    db = get_db()
+    return bool(db.execute("SELECT admin FROM user WHERE id = ?", (user_id,)).fetchone()[0])
 
 @click.command("init-db")
 @with_appcontext

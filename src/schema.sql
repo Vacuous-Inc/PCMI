@@ -3,5 +3,6 @@ CREATE TABLE user (
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   profile_pic TEXT NOT NULL,
-  balance REAL NOT NULL
+  balance INTEGER NOT NULL,
+  admin INTEGER NOT NULL
 );

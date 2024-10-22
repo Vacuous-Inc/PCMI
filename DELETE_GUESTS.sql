@@ -1,0 +1,2 @@
+DELETE FROM user WHERE email LIKE "%@GUEST%";
+SELECT * FROM user;
