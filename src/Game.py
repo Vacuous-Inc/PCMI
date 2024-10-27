@@ -1,8 +1,8 @@
 '''
 Main code for integrating different components and running the game itself
 '''
-#from Physical import Robot, Camera
-import User
+from Physical import Robot, Camera
+from flask_socketio import emit
 
 global robot
 robot = Robot()
@@ -11,69 +11,91 @@ camera = Camera()
 
 class Game:
 
-    def __init__(self, players):
-        self.players = players
+    def __init__(self, players, namespace):
+        self.players = [Player(x) for x in players]
         self.dealer = Dealer()
+        self.space = namespace
         
         
     def start(self):
         robot.start()
-        self.cardData = camera.readDeal()
+        cardData = camera.readDeal()
 
-        for i, p in self.players:
-            p.addCards(self.cardData[2*i])
-            p.addCards(self.cardData[(2*i)+1])
+        for i, p in enumerate(self.players):
+            p.hand.append(cardData[2*i])
+            p.handValue += parse_card(cardData[2*i])
+            p.hand.append(cardData[(2*i)+1])
+            p.handValue += parse_card(cardData[(2*i)+1])
         
         for p in self.players:
             p.blackjack()
         
-        self.dealer.addCards(self.cardData[-1])
+        self.dealer.hand.append(cardData[-1])
+        p.handValue += parse_card(cardData[-1])
 
-        for i, p in self.players:
-            p.take_turn(i)
+        emit("Turn", {"Player":self.players[0].user.name, "Info":self.players[0].info()}, namespace=self.space)
 
+    def dealer_turn(self):
         self.dealer.take_turn()
-
         self.resolve_board()
-
-        dict = {
-            "player_one": self.players[0].info,
-            "player_two": self.players[1].info,
-            "player_three": self.players[2].info,
-            "dealer": self.dealer.info
-        }
     
     def resolve_board(self):
         for p in self.players:
             if p.blackjack:
                 p.balance += p.wager * 2
-            elif not p.bust and (self.dealer.bust):
+            elif (not p.bust) and (self.dealer.bust or (p.handValue > self.dealer.handValue)):
                 p.balance += p.wager
             elif p.bust or (p.handValue < self.dealer.handValue):
                 p.balance -= p.wager
+            else:
+                p.push = True
+                pass
+
+    def info(self):
+        return {
+            "player_one": self.players[0].info,
+            "player_two": self.players[1].info,
+            "player_three": self.players[2].info,
+            "dealer": self.dealer.info
+        }
                 
-        
+FACES = ['K','Q','J']  
+
+def parse_card(card):
+    rank = card[0]
+
+    if rank == 'A':
+        return 11
+    elif rank in FACES:
+        return 10
+    else:
+        return rank
 
 
 
 class Player:
-    def __init__(user, self):
+    def __init__(self, user):
         self.user = user
         self.balance = user.balance
         self.hand = []
         self.handValue
         self.wager
-        self.bust
-        self.blackjack
+        self.bust = False
+        self.blackjack = False
+        self.push = False
 
+    '''
     def take_turn(self, place):
         while (not self.blackjack) and (not self.bust):
             #They take their turn??
             pass
+    '''
 
     def hit(self, place):
         robot.deal(place)
-        self.hand().append(camera.readDeal())
+        newCard = camera.readDeal()
+        self.hand.append(newCard)
+        self.handValue += parse_card(newCard)
         #Add a value to the handValue but idk how to do that just yet
         self.blackjack()
         self.bust()
@@ -90,11 +112,11 @@ class Player:
         self.blackjack()
         self.bust()
 
-    def blackjack():
-        pass
+    def blackjack(self):
+        self.blackjack = self.handValue == 21
 
-    def bust():
-        pass
+    def bust(self):
+        self.bust = self.handValue > 21
 
     def info(self):
         dict = {
@@ -117,10 +139,13 @@ class Dealer:
     def take_turn(place, self):
         while sum(self.handValue) < 17:
             self.hit(place)
+        self.stand()
     
     def hit(place, self):
         robot.deal(place)
-        self.hand().append(camera.readDeal())
+        newCard = camera.readDeal()
+        self.hand.append(newCard)
+        self.handValue += parse_card(newCard)
         #Add a value to the handValue but idk how to do that just yet
         self.blackjack()
         self.bust()
@@ -129,11 +154,11 @@ class Dealer:
         #Lowkey not sure how to do this one either
         pass
 
-    def blackjack():
-        pass
+    def blackjack(self):
+        self.blackjack = self.handValue == 21
 
-    def bust():
-        pass
+    def bust(self):
+        self.bust = self.handValue > 21
 
     def info(self):
         dict = {
