@@ -1,4 +1,4 @@
-from flask_socketio import Namespace, emit, ConnectionRefusedError, join_room, leave_room, send, rooms
+from flask_socketio import Namespace, emit, join_room, leave_room, send, rooms, ConnectionRefusedError
 from flask import request
 from flask_login import current_user
 
@@ -25,13 +25,22 @@ class Playing(Namespace):
         print(f"{request.sid} disconnected from game")
         leave_room(gameRoom,request.sid)
         current_user.sid = None
-        players.pop(current_user)
+        players.pop(players.index(current_user))
         return "ok"
 
     def on_start(self):
         print("starting game")
-        return "ok"
+        return "ok" 
     
+    def send_game_data(self, message):
+        emit("game_event", message, namespace="/play", to=gameRoom)
+
+    def on_game_event(self, message):
+        data = dict(message)
+        event = data.get("type")
+        player = data.get("pid")
+        print(f"{player} performed a {event}")
+        
 
 
 class Home(Namespace):

@@ -4,6 +4,23 @@ socket.on("connect", function() {
   console.log(socket.id); // x8WIv7-mJelg7on_ALbx
 });
 
+
+var player
+socket.on("connected", function(data){
+
+  sid = data.get("sid");
+
+  if (sid  == socket.id){
+    pid = data.get("pid");
+    cash = data.get("cash");
+  }
+
+  if (!player){
+    player = new Player(sid, pid, cash);
+  }
+
+});
+
 var text = document.getElementById("gameText");
 socket.on("start", function(msg) {
   //console.log("starting the game")
@@ -15,65 +32,38 @@ socket.on("start", function(msg) {
 
 
 
-/*
+socket.on("game_event", function(data) {
 
-A JavaScript Blackjack game created June 2013 by Chris Clower 
-(clowerweb.com). Deck class loosely based on a tutorial at:
-http://www.codecademy.com/courses/blackjack-part-1
+  var parse = data
 
-All graphics and code were designed/written by me except for the
-chip box on the table, which was taken from the image at:
-http://www.marketwallpapers.com/wallpapers/9/wallpaper-52946.jpg
+  if (parse.get("player") == player.pid){
 
-Uses Twitter Bootstrap and jQuery, which also were not created by
-me :)
 
-Fonts used:
-* "Blackjack" logo: Exmouth
-* Symbol/floral graphics: Dingleberries
-* All other fonts: Adobe Garamond Pro
 
-All graphics designed in Adobe Fireworks CS6
+  }
+  
+});
 
-You are free to use or modify this code for any purpose, but I ask
-that you leave this comment intact. Please understand that this is
-still very much a work in progress, and is not feature complete nor
-without bugs.
 
-I will also try to comment the code better for future updates :D
 
-*/
 
-/*global $, confirm, Game, Player, renderCard, Card, setActions, 
-resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
+//PLAYER
 
-function Game() {
 
-/*****************************************************************/
-/*************************** Globals *****************************/
-/*****************************************************************/
+class Player {
 
-	var game      = new Game(),
-			player    = new Player(),
-			dealer    = new Player(),
-			running   = false,
-			blackjack = false,
-			insured   = 0,
-			deal;
+  constructor(sid, pid, balance){
+		this.hand  = [],
+		this.wager = 0,
+		this.cash  = balance,
+		this.bank  = 0,
+		this.ele   = '',
+		this.score = '',
+    this.pid = pid;
+    this.sid = sid;
+  }
 
-/*****************************************************************/
-/*************************** Classes *****************************/
-/*****************************************************************/
-
-	function Player() {
-		var hand  = [],
-				wager = 0,
-				cash  = 1000,
-				bank  = 0,
-				ele   = '',
-				score = '';
-
-		this.getElements = function() {
+	getElements() {
 			if(this === player) {
 				ele   = '#phand';
 				score = '#pcard-0 .popover-content';
@@ -85,44 +75,44 @@ function Game() {
 			return {'ele': ele, 'score': score};
 		};
 
-		this.getHand = function() {
+	getHand() {
 			return hand;
 		};
 
-		this.setHand = function(card) {
+	setHand(card) {
 			hand.push(card);
 		};
 
-		this.resetHand = function() {
+  resetHandfunction() {
 			hand = [];
 		};
 
-		this.getWager = function() {
+	getWager() {
 			return wager;
 		};
 
-		this.setWager = function(money) {
+	setWager(money) {
 			wager += parseInt(money, 0);
 		};
 
-		this.resetWager = function() {
+	resetWager() {
 			wager = 0;
 		};
 
-		this.checkWager = function() {
+	checkWager() {
 			return wager <= cash ? true : false;
 		};
 
-		this.getCash = function() {
+	getCash() {
 			return cash.formatMoney(2, '.', ',');
 		};
 
-		this.setCash = function(money) {
+	setCash(money) {
 			cash += money;
 			this.updateBoard();
 		};
 
-		this.getBank = function() {
+	getBank() {
 			$('#bank').html('Winnings: $' + bank.formatMoney(2, '.', ','));
 
 			if(bank < 0) {
@@ -131,12 +121,12 @@ function Game() {
 			}
 		};
 
-		this.setBank = function(money) {
+	setBank(money) {
 			bank += money;
 			this.updateBoard();
 		};
 
-		this.flipCards = function() {
+	flipCards() {
 			$('.down').each(function() {
 				$(this).removeClass('down').addClass('up');
 				renderCard(false, false, false, $(this));
@@ -146,64 +136,56 @@ function Game() {
 		};
 	}
 
+
+
+/*****************************************************************/
+/*************************** Classes *****************************/
+/*****************************************************************/
+
+
+
 	function Deck() {
 		var ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'],
 				suits = ['&#9824;', '&#9827;', '&#9829;', '&#9670;'],
-				deck  = [],
-				i, x, card;
+        hand = [],
+        card;
 
 		this.getDeck = function() {
 			return this.setDeck();
 		};
 
-		this.setDeck = function() {
-			for(i = 0; i < ranks.length; i++) {
-				for(x = 0; x < suits.length; x++) {
-					card = new Card({'rank': ranks[i]});
+		this.pushCard = function(rank, suit) {
+	
+					card = new Card({'rank': rank});
 
-					deck.push({
-						'rank' : ranks[i],
-						'suit' : suits[x],
+					hand.push({
+						'rank' : rank,
+						'suit' : suits[suit],
 						'value': card.getValue()
 					});
-				}
-			}
 
-			return deck;
+			return hand;
 		};
 	}
 
-	function Shuffle(deck) {
-		var set      = deck.getDeck(),
-				shuffled = [],
-				card;
+	class Card {
 
-		this.setShuffle = function() {
-			while(set.length > 0) {
-				card = Math.floor(Math.random() * set.length);
+    constructor(){
 
-				shuffled.push(set[card]);
-				set.splice(card, 1);
-			}
+      this.ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+      this.suits = ['&#9824;', '&#9827;', '&#9829;', '&#9670;'];
 
-			return shuffled;
+    }
+
+		getRank() {
+			return this.rank;
 		};
 
-		this.getShuffle = function() {	
-			return this.setShuffle();
-		};
-	}
-
-	function Card(card) {
-		this.getRank = function() {
-			return card.rank;
+		getSuit() {
+			return this.suit;
 		};
 
-		this.getSuit = function() {
-			return card.suit;
-		};
-
-		this.getValue = function() {
+		getValue() {
 			var rank  = this.getRank(),
 				  value = 0;
 
@@ -315,6 +297,9 @@ function Game() {
 			}
 		};
 	}
+
+
+
 
 /*****************************************************************/
 /************************* Extensions ****************************/
@@ -704,41 +689,24 @@ function Game() {
 /*************************** Actions *****************************/
 /*****************************************************************/
 
-	$('#deal').on('click', function() {
-		var cash = parseInt(player.getCash());
-
-		$('#alert').fadeOut();
-
-		if(cash > 0 && !running) {
-			if($.trim($('#wager').val()) > 0) {
-				game.newGame();
-			} else {
-				$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
-				showAlert('The minimum bet is $1.');
-			}
-		} else {
-			$('#myModal').modal();
-		}
-	});
-
 	$('#hit').on('click', function() {
-		player.hit();
+		socket.emit("game_event",{"pid":player.pid,"type":"hit"});
 	});
 
 	$('#stand').on('click', function() {
-		player.stand();
+		socket.emit("game_event",{"pid":player.pid,"type":"stand"});
 	});
 
 	$('#double').on('click', function() {
-		player.dbl();
+		socket.emit("game_event",{"pid":player.pid,"type":"double"});
 	});
 
 	$('#split').on('click', function() {
-		player.split();
+		socket.emit("game_event",{"pid":player.pid,"type":"split"});
 	});
 
 	$('#insurance').on('click', function() {
-		player.insure();
+		socket.emit("game_event",{"pid":player.pid,"type":"insure"});
 	});
 
 /*****************************************************************/
@@ -753,4 +721,3 @@ function Game() {
 	$('#cash span').html(player.getCash());
 	player.getBank();
 
-};
