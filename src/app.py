@@ -22,7 +22,6 @@ from google.auth.transport import requests
 
 #SQL
 
-
 import os
 import json
 

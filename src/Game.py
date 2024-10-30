@@ -4,10 +4,26 @@ Main code for integrating different components and running the game itself
 from Physical import Robot, Camera
 from flask_socketio import emit
 
+
 global robot
 robot = Robot()
 global camera
-camera = Camera()
+camera = robot.camera
+
+
+
+FACES = ['K','Q','J']  
+
+def parse_card(card):
+    rank = card.rank
+
+    if rank == 'A':
+        return 11
+    elif rank in FACES:
+        return 10
+    else:
+        return rank
+
 
 class Game:
 
@@ -15,11 +31,12 @@ class Game:
         self.players = [Player(x) for x in players]
         self.dealer = Dealer()
         self.space = namespace
-        
+        self.count = 0
         
     def start(self):
-        robot.start()
-        cardData = camera.readDeal()
+        robot.start(len(self.players))
+        cardData = camera.read_deal()
+        print(cardData)
 
         for i, p in enumerate(self.players):
             p.hand.append(cardData[2*i])
@@ -28,12 +45,10 @@ class Game:
             p.handValue += parse_card(cardData[(2*i)+1])
         
         for p in self.players:
-            p.blackjack()
+            p.has_blackjack()
         
         self.dealer.hand.append(cardData[-1])
         p.handValue += parse_card(cardData[-1])
-
-        emit("Turn", {"Player":self.players[0].user.name, "Info":self.players[0].info()}, namespace=self.space)
 
     def dealer_turn(self):
         self.dealer.take_turn()
@@ -49,7 +64,6 @@ class Game:
                 p.balance -= p.wager
             else:
                 p.push = True
-                pass
 
     def info(self):
         return {
@@ -58,19 +72,15 @@ class Game:
             "player_three": self.players[2].info,
             "dealer": self.dealer.info
         }
+    
+    def advance(self):
+        self.count += 1
+        self.players[self.count].take_turn()
                 
-FACES = ['K','Q','J']  
-
-def parse_card(card):
-    rank = card[0]
-
-    if rank == 'A':
-        return 11
-    elif rank in FACES:
-        return 10
-    else:
-        return rank
-
+    def hit(self, player):
+        p = self.players[self.count]
+        if player == p.user.id:
+            p.hit()
 
 
 class Player:
@@ -78,27 +88,26 @@ class Player:
         self.user = user
         self.balance = user.balance
         self.hand = []
-        self.handValue
-        self.wager
+        self.handValue = 0
+        self.wager = 0
         self.bust = False
         self.blackjack = False
         self.push = False
 
-    '''
+    
     def take_turn(self, place):
         while (not self.blackjack) and (not self.bust):
-            #They take their turn??
-            pass
-    '''
+            emit("turn", {"Player":self.user.name, "Info":self.info()}, namespace=self.space)
+
 
     def hit(self, place):
         robot.deal(place)
-        newCard = camera.readDeal()
+        newCard = camera.read_deal()
         self.hand.append(newCard)
         self.handValue += parse_card(newCard)
         #Add a value to the handValue but idk how to do that just yet
-        self.blackjack()
-        self.bust()
+        self.has_blackjack()
+        self.has_bust()
     
     def stand(self):
         #Lowkey not sure how to do this one either
@@ -107,15 +116,17 @@ class Player:
     def double_down(self, place):
         self.wager *= 2
         robot.deal(place)
-        self.hand().append(camera.readDeal())
+        newCard = camera.read_deal()
+        self.hand.append(newCard)
+        self.handValue += parse_card(newCard)
         #Add a value to the handValue but idk how to do that just yet
-        self.blackjack()
-        self.bust()
+        self.has_blackjack()
+        self.has_bust()
 
-    def blackjack(self):
+    def has_blackjack(self):
         self.blackjack = self.handValue == 21
 
-    def bust(self):
+    def has_bust(self):
         self.bust = self.handValue > 21
 
     def info(self):
@@ -131,10 +142,10 @@ class Player:
 class Dealer:
     def __init__(self):
         self.hand = []
-        self.handValue
-        self.wager
-        self.bust
-        self.blackjack
+        self.handValue = 0
+        self.wager = 0
+        self.bust = False
+        self.blackjack = False
 
     def take_turn(place, self):
         while sum(self.handValue) < 17:
@@ -143,21 +154,21 @@ class Dealer:
     
     def hit(place, self):
         robot.deal(place)
-        newCard = camera.readDeal()
+        newCard = camera.read_deal()
         self.hand.append(newCard)
         self.handValue += parse_card(newCard)
         #Add a value to the handValue but idk how to do that just yet
-        self.blackjack()
-        self.bust()
+        self.has_blackjack()
+        self.has_bust()
     
     def stand(self):
         #Lowkey not sure how to do this one either
         pass
 
-    def blackjack(self):
+    def has_blackjack(self):
         self.blackjack = self.handValue == 21
 
-    def bust(self):
+    def has_bust(self):
         self.bust = self.handValue > 21
 
     def info(self):

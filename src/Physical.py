@@ -3,8 +3,12 @@ Class for interacting with the robotic arm and card shuffler
 '''
 
 from math import sqrt, atan, acos
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
+from RPiSim.GPIO import GPIO
 import time
+
+from Deck import Deck
+
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -29,7 +33,8 @@ class Robot:
         self.wristPin = 16
 
         #declare pins as output
-        GPIO.setup([self.basePin, self.waistPin, self.shoulderPin, self.elbowPin, self.wristPin], GPIO.OUT)
+        #GPIO.setup([self.basePin, self.waistPin, self.shoulderPin, self.elbowPin, self.wristPin], GPIO.OUT)
+        [GPIO.setup(x, GPIO.OUT) for x in [self.basePin, self.waistPin, self.shoulderPin, self.elbowPin, self.wristPin]]
 
         #declare pins as PWM
         self.base = GPIO.PWM(self.basePin, 50)
@@ -39,17 +44,32 @@ class Robot:
         self.wrist = GPIO.PWM(self.wristPin, 50)
 
         #start PWM and set angle to 0
-        self.base.start(0)
-        self.waist.start(0)
-        self.shoulder.start(0)
-        self.elbow.start(0)
-        self.wrist.start(0)
+        #self.base.start(0)
+        #self.waist.start(0)
+        #self.shoulder.start(0)
+        #self.elbow.start(0)
+        #self.wrist.start(0)
 
         #get our shuffler
         self.shuffler = Shuffler()
 
         #get our pump
         self.pump = Pump()
+
+        #get our camera
+        self.camera = Camera()
+
+
+        #testing values
+        self.deck = Deck()
+
+
+    def start(self, numPlayers):
+        print(numPlayers)
+        deal = self.deck.deal((numPlayers*2) + 1)
+        print(deal)
+        self.camera.queue.extend(deal)
+        print("dealing initial cards")
 
     #moves arm to specified distance
     def extend(r,self):
@@ -58,14 +78,14 @@ class Robot:
         dc = (theta/36) + 5
         dc_ = ((90-theta)/36) + 5
         
-        self.waist.ChangeDutyCycle(dc)
-        self.shoulder.ChangeDutyCycle(dc*2)
-        self.elbow.ChangeDutyCycle(dc_)
+        #self.waist.ChangeDutyCycle(dc)
+        #self.shoulder.ChangeDutyCycle(dc*2)
+        #self.elbow.ChangeDutyCycle(dc_)
 
     #rotates arm to specified angle
     def rotate(theta,self):
         dc = (theta/36) + 5
-        self.base.ChangeDutyCycle(dc)
+        #self.base.ChangeDutyCycle(dc)
 
     #moves hand to specied point
     def move_to_coords(x,y,self):
@@ -84,6 +104,9 @@ class Robot:
     def shuffle(self):
         self.shuffler.shuffle()
 
+    def deal(self,pos):
+        self.camera.queue.extend(self.deck.deal(1))
+        print(f"Dealt 1 card to {pos}")
 
 #control the shuffler
 class Shuffler:
@@ -124,4 +147,12 @@ class Pump:
 #Class for handling card recoginition and camera i/o
 class Camera:
     def __init__(self):
+        self.queue = []
         pass
+
+    def read_deal(self):
+        hold = self.queue
+        print(hold)
+        self.queue = []
+        print(hold)
+        return hold

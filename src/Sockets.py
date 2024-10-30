@@ -15,9 +15,10 @@ class Playing(Namespace):
 
     def on_connect(self):
         print(f"{request.sid} connected to game")
-        join_room(gameRoom,request.sid)
-        current_user.sid = request.sid
-        players.append(current_user)
+        if len(players) < 4:
+            join_room(gameRoom,request.sid)
+            current_user.sid = request.sid
+            players.append(current_user)
         print(rooms(request.sid))
         return "connected"
 
@@ -35,6 +36,15 @@ class Playing(Namespace):
     def send_game_data(self, message):
         emit("game_event", message, namespace="/play", to=gameRoom)
 
+    def on_hit(self, message):
+        data = dict(message)
+        player = data.get("pid")
+        game.hit(player)
+
+    def on_stand(self):
+        game.advance()
+        print("STAND")
+    
     def on_game_event(self, message):
         data = dict(message)
         event = data.get("type")
@@ -46,7 +56,7 @@ class Playing(Namespace):
 class Home(Namespace):
     def on_connect(self):
         print("test")
-        raise ConnectionRefusedError('unauthorized!')
+        
     
 
 class Admin(Namespace):
@@ -56,7 +66,7 @@ class Admin(Namespace):
     
     def on_start_game(self):
         print("starting game")
-        game = Game(players)
+        game = Game(players, gameRoom)
         emit("start", broadcast=True, namespace="/play")
         send("started", namespace="/admin")
         game.start()

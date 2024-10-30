@@ -17,6 +17,11 @@ socket.on("connected", function(data){
 
   if (!player){
     player = new Player(sid, pid, cash);
+
+	$('#cash span').html(player.getCash());
+
+	player.getBank();
+
   }
 
 });
@@ -26,7 +31,7 @@ socket.on("start", function(msg) {
   //console.log("starting the game")
   text.innerText = "STARTING THE GAME"
 
-  Game();
+  //Game();
 
 });
 
@@ -44,7 +49,27 @@ socket.on("game_event", function(data) {
   
 });
 
+socket.on("turn", function(data){
+	var parse = data
+	console.log("its someones turn")
 
+  if (parse.get("player") == player.pid){
+
+	console.log("its my turn!")
+
+	setActions("run");
+	text.innerText = "Your turn " + player.pid
+
+  }
+	
+});
+
+
+
+
+/*****************************************************************/
+/*************************** Classes *****************************/
+/*****************************************************************/
 
 
 //PLAYER
@@ -52,28 +77,28 @@ socket.on("game_event", function(data) {
 
 class Player {
 
-  constructor(sid, pid, balance){
+  	constructor(sid, pid, balance){
 		this.hand  = [],
 		this.wager = 0,
 		this.cash  = balance,
 		this.bank  = 0,
 		this.ele   = '',
 		this.score = '',
-    this.pid = pid;
-    this.sid = sid;
-  }
+		this.pid = pid;
+		this.sid = sid;
+	}
 
 	getElements() {
-			if(this === player) {
-				ele   = '#phand';
-				score = '#pcard-0 .popover-content';
-			} else {
-				ele   = '#dhand';
-				score = '#dcard-0 .popover-content';
-			}
+		if(this === player) {
+			ele   = '#phand';
+			score = '#pcard-0 .popover-content';
+		} else {
+			ele   = '#dhand';
+			score = '#dcard-0 .popover-content';
+		}
 
-			return {'ele': ele, 'score': score};
-		};
+		return {'ele': ele, 'score': score};
+	};
 
 	getHand() {
 			return hand;
@@ -83,220 +108,216 @@ class Player {
 			hand.push(card);
 		};
 
-  resetHandfunction() {
+ 	resetHandfunction() {
 			hand = [];
 		};
 
 	getWager() {
-			return wager;
-		};
+		return wager;
+	};
 
 	setWager(money) {
-			wager += parseInt(money, 0);
-		};
+		wager += parseInt(money, 0);
+	};
 
 	resetWager() {
-			wager = 0;
-		};
+		wager = 0;
+	};
 
 	checkWager() {
-			return wager <= cash ? true : false;
-		};
+		return wager <= cash ? true : false;
+	};
 
 	getCash() {
-			return cash.formatMoney(2, '.', ',');
-		};
+		return cash.formatMoney(2, '.', ',');
+	};
 
 	setCash(money) {
-			cash += money;
-			this.updateBoard();
-		};
+		cash += money;
+		this.updateBoard();
+	};
 
 	getBank() {
-			$('#bank').html('Winnings: $' + bank.formatMoney(2, '.', ','));
+		$('#bank').html('Winnings: $' + bank.formatMoney(2, '.', ','));
 
-			if(bank < 0) {
-				$('#bank').html('Winnings: <span style="color: #D90000">-$' + 
-				bank.formatMoney(2, '.', ',').toString().replace('-', '') + '</span>');
-			}
-		};
+		if(bank < 0) {
+			$('#bank').html('Winnings: <span style="color: #D90000">-$' + 
+			bank.formatMoney(2, '.', ',').toString().replace('-', '') + '</span>');
+		}
+	};
 
 	setBank(money) {
-			bank += money;
-			this.updateBoard();
-		};
+		bank += money;
+		this.updateBoard();
+	};
 
 	flipCards() {
-			$('.down').each(function() {
-				$(this).removeClass('down').addClass('up');
-				renderCard(false, false, false, $(this));
-			});
+		$('.down').each(function() {
+			$(this).removeClass('down').addClass('up');
+			renderCard(false, false, false, $(this));
+		});
 
-			$('#dcard-0 .popover-content').html(dealer.getScore());
-		};
-	}
-
-
-
-/*****************************************************************/
-/*************************** Classes *****************************/
-/*****************************************************************/
+		$('#dcard-0 .popover-content').html(dealer.getScore());
+	};
+}
 
 
+/*
 
-	function Deck() {
-		var ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'],
-				suits = ['&#9824;', '&#9827;', '&#9829;', '&#9670;'],
-        hand = [],
-        card;
 
-		this.getDeck = function() {
-			return this.setDeck();
-		};
+function Deck() {
+	var ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'],
+			suits = ['&#9824;', '&#9827;', '&#9829;', '&#9670;'],
+	hand = [],
+	card;
 
-		this.pushCard = function(rank, suit) {
-	
-					card = new Card({'rank': rank});
+	this.getDeck = function() {
+		return this.setDeck();
+	};
 
-					hand.push({
-						'rank' : rank,
-						'suit' : suits[suit],
-						'value': card.getValue()
-					});
+	this.pushCard = function(rank, suit) {
 
-			return hand;
-		};
-	}
+				card = new Card({'rank': rank});
 
-	class Card {
+				hand.push({
+					'rank' : rank,
+					'suit' : suits[suit],
+					'value': card.getValue()
+				});
 
-    constructor(){
+		return hand;
+	};
+}
 
-      this.ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-      this.suits = ['&#9824;', '&#9827;', '&#9829;', '&#9670;'];
+class Card {
 
-    }
+constructor(){
 
-		getRank() {
-			return this.rank;
-		};
+	this.ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+	this.suits = ['&#9824;', '&#9827;', '&#9829;', '&#9670;'];
 
-		getSuit() {
-			return this.suit;
-		};
+}
 
-		getValue() {
-			var rank  = this.getRank(),
-				  value = 0;
+	getRank() {
+		return this.rank;
+	};
 
-			if(rank === 'A') {
-				value = 11;
-			} else if(rank === 'K') {
-				value = 10;
-			} else if(rank === 'Q') {
-				value = 10;
-			} else if(rank === 'J') {
-				value = 10;
-			} else {
-				value = parseInt(rank, 0);
+	getSuit() {
+		return this.suit;
+	};
+
+	getValue() {
+		var rank  = this.getRank(),
+				value = 0;
+
+		if(rank === 'A') {
+			value = 11;
+		} else if(rank === 'K') {
+			value = 10;
+		} else if(rank === 'Q') {
+			value = 10;
+		} else if(rank === 'J') {
+			value = 10;
+		} else {
+			value = parseInt(rank, 0);
+		}
+
+		return value;
+	};
+}
+
+function Deal() {
+	var deck     = new Deck(),
+			shuffle  = new Shuffle(deck),
+			shuffled = shuffle.getShuffle(),
+			card;
+
+	this.getCard = function(sender) {
+		this.setCard(sender);
+		return card;
+	};
+
+	this.setCard = function(sender) {
+		card = shuffled[0];
+		shuffled.splice(card, 1);
+		sender.setHand(card);
+	};
+
+	this.dealCard = function(num, i, obj) {
+		if(i >= num) { return false; }
+
+		var sender   = obj[i],
+				elements = obj[i].getElements(),
+				score    = elements.score,
+				ele      = elements.ele,
+				dhand    = dealer.getHand();
+
+		deal.getCard(sender);
+
+		if(i < 3) {
+			renderCard(ele, sender, 'up');
+			$(score).html(sender.getScore());
+		} else {
+			renderCard(ele, sender, 'down');
+		}
+
+		if(player.getHand().length < 3) {
+			if(dhand.length > 0 && dhand[0].rank === 'A') {
+				setActions('insurance');
 			}
 
-			return value;
-		};
-	}
-
-	function Deal() {
-		var deck     = new Deck(),
-				shuffle  = new Shuffle(deck),
-				shuffled = shuffle.getShuffle(),
-				card;
-
-		this.getCard = function(sender) {
-			this.setCard(sender);
-			return card;
-		};
-
-		this.setCard = function(sender) {
-			card = shuffled[0];
-			shuffled.splice(card, 1);
-			sender.setHand(card);
-		};
-
-		this.dealCard = function(num, i, obj) {
-			if(i >= num) { return false; }
-
-			var sender   = obj[i],
-					elements = obj[i].getElements(),
-					score    = elements.score,
-					ele      = elements.ele,
-					dhand    = dealer.getHand();
-
-			deal.getCard(sender);
-
-			if(i < 3) {
-				renderCard(ele, sender, 'up');
-				$(score).html(sender.getScore());
-			} else {
-				renderCard(ele, sender, 'down');
-			}
-
-			if(player.getHand().length < 3) {
-				if(dhand.length > 0 && dhand[0].rank === 'A') {
-					setActions('insurance');
-				}
-
-				if(player.getScore() === 21) {
-					if(!blackjack) {
-						blackjack = true;
-						getWinner();
-					} else {
-						dealer.flipCards();
-						$('#dscore span').html(dealer.getScore());
-					}
+			if(player.getScore() === 21) {
+				if(!blackjack) {
+					blackjack = true;
+					getWinner();
 				} else {
-					if(dhand.length > 1) {
-						setActions('run');
-					}
+					dealer.flipCards();
+					$('#dscore span').html(dealer.getScore());
+				}
+			} else {
+				if(dhand.length > 1) {
+					setActions('run');
 				}
 			}
+		}
 
-			function showCards() {
-				setTimeout(function() {
-					deal.dealCard(num, i + 1, obj);
-				}, 500);
-			}
+		function showCards() {
+			setTimeout(function() {
+				deal.dealCard(num, i + 1, obj);
+			}, 500);
+		}
 
-			clearTimeout(showCards());
-		};
-	}
+		clearTimeout(showCards());
+	};
+}
 
-	function Game() {
-		this.newGame = function() {
-			var wager = $.trim($('#wager').val());
+function Game() {
+	this.newGame = function() {
+		var wager = $.trim($('#wager').val());
 
-			player.resetWager();
-			player.setWager(wager);
+		player.resetWager();
+		player.setWager(wager);
 
-			if(player.checkWager()) {
-				$('#deal').prop('disabled', true);
-				resetBoard();
-				player.setCash(-wager);
+		if(player.checkWager()) {
+			$('#deal').prop('disabled', true);
+			resetBoard();
+			player.setCash(-wager);
 
-				deal      = new Deal();
-				running   = true;
-				blackjack = false;
-				insured   = false;
+			deal      = new Deal();
+			running   = true;
+			blackjack = false;
+			insured   = false;
 
-				player.resetHand();
-				dealer.resetHand();
-				showBoard();
-			} else {
-				player.setWager(-wager);
-				$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
-				showAlert('Wager cannot exceed available cash!');
-			}
-		};
-	}
+			player.resetHand();
+			dealer.resetHand();
+			showBoard();
+		} else {
+			player.setWager(-wager);
+			$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
+			showAlert('Wager cannot exceed available cash!');
+		}
+	};
+}
 
 
 
@@ -433,291 +454,287 @@ class Player {
 /************************** Functions ****************************/
 /*****************************************************************/
 
-	(function($) {
-    $.fn.disableSelection = function() {
-      return this.attr('unselectable', 'on')
-                 .css('user-select', 'none')
-                 .on('selectstart', false);
-    };
-	}(jQuery));
+(function($) {
+$.fn.disableSelection = function() {
+	return this.attr('unselectable', 'on')
+				.css('user-select', 'none')
+				.on('selectstart', false);
+};
+}(jQuery));
 
-	(function($) {
-		$.fn.numOnly = function() {
-			this.on('keydown', function(e) {
-				if(e.keyCode === 46 || e.keyCode === 8 || e.keyCode === 9 || e.keyCode === 27 || e.keyCode === 13 || (e.keyCode === 65 && e.ctrlKey === true) || (e.keyCode >= 35 && e.keyCode <= 39)) {
-					return true;
-				} else {
-					if(e.shifKey || ((e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105))) {
-						e.preventDefault();
-					}
-				}
-			});
-		};
-	}(jQuery));
-
-	function showAlert(msg) {
-		$('#alert span').html('<strong>' + msg + '</strong>');
-		$('#alert').fadeIn();
-	}
-
-	function setActions(opts) {
-		var hand = player.getHand();
-
-		if(!running) {
-			$('#deal')  .prop('disabled', false);
-			$('#hit')   .prop('disabled', true);
-			$('#stand') .prop('disabled', true);
-			$('#double').prop('disabled', true);
-			$('#split') .prop('disabled', true);
-			$('#insurance').prop('disabled', true);
-		}
-
-		if(opts === 'run') {
-			$('#deal')  .prop('disabled', true);
-			$('#hit')   .prop('disabled', false);
-			$('#stand') .prop('disabled', false);
-
-			if(player.checkWager(wager * 2)) {
-				$('#double').prop('disabled', false);
-			}
-		} else if(opts === 'split') {
-			$('#split').prop('disabled', false);
-		} else if(opts === 'insurance') {
-			$('#insurance').prop('disabled', false);
-		} else if(hand.length > 2) {
-			$('#double')   .prop('disabled', true);
-			$('#split')    .prop('disabled', true);
-			$('#insurance').prop('disabled', true);
-		}
-	}
-
-	function showBoard() {
-		deal.dealCard(4, 0, [player, dealer, player, dealer]);
-	}
-
-	function renderCard(ele, sender, type, item) {
-		var hand, i, card;
-
-		if(!item) {
-			hand = sender.getHand();
-		 	i    = hand.length - 1;
-		 	card = new Card(hand[i]);
-		} else {
-		 	hand = dealer.getHand();
-		 	card = new Card(hand[1]);
-		}
-
-		var	rank  = card.getRank(),
-				suit  = card.getSuit(),
-				color = 'red',
-				posx  = 402,
-				posy  = 182,
-				speed = 200,
-				cards = ele + ' .card-' + i;
-
-		if(i > 0) {
-			posx -= 50 * i;
-		}
-
-		if(!item) {
-			$(ele).append(
-				'<div class="card-' + i + ' ' + type + '">' + 
-					'<span class="pos-0">' +
-						'<span class="rank">&nbsp;</span>' +
-						'<span class="suit">&nbsp;</span>' +
-					'</span>' +
-					'<span class="pos-1">' +
-						'<span class="rank">&nbsp;</span>' +
-						'<span class="suit">&nbsp;</span>' +
-					'</span>' +
-				'</div>'
-			);
-
-			if(ele === '#phand') {
-				posy  = 360;
-				speed = 500;
-				$(ele + ' div.card-' + i).attr('id', 'pcard-' + i);
-
-				if(hand.length < 2) {
-					$('#pcard-0').popover({
-						animation: false,
-						container: '#pcard-0',
-						content: player.getScore(),
-						placement: 'left',
-						title: 'You Have',
-						trigger: 'manual'
-					});
-
-					setTimeout(function() {
-						$('#pcard-0').popover('show');
-						$('#pcard-0 .popover').css('display', 'none').fadeIn();
-					}, 500);
-				}
+(function($) {
+	$.fn.numOnly = function() {
+		this.on('keydown', function(e) {
+			if(e.keyCode === 46 || e.keyCode === 8 || e.keyCode === 9 || e.keyCode === 27 || e.keyCode === 13 || (e.keyCode === 65 && e.ctrlKey === true) || (e.keyCode >= 35 && e.keyCode <= 39)) {
+				return true;
 			} else {
-				$(ele + ' div.card-' + i).attr('id', 'dcard-' + i);
-
-				if(hand.length < 2) {
-					$('#dcard-0').popover({
-						container: '#dcard-0',
-						content: dealer.getScore(),
-						placement: 'left',
-						title: 'Dealer Has',
-						trigger: 'manual'
-					});
-
-					setTimeout(function() {
-						$('#dcard-0').popover('show');
-						$('#dcard-0 .popover').fadeIn();
-					}, 100);
+				if(e.shifKey || ((e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105))) {
+					e.preventDefault();
 				}
 			}
+		});
+	};
+}(jQuery));
 
-			$(ele + ' .card-' + i).css('z-index', i);
+function showAlert(msg) {
+	$('#alert span').html('<strong>' + msg + '</strong>');
+	$('#alert').fadeIn();
+}
 
-			$(ele + ' .card-' + i).animate({
-				'top': posy,
-				'right': posx
-			}, speed);
+function setActions(opts) {
+	var hand = player.getHand();
 
-			$(ele).queue(function() {
-				$(this).animate({ 'left': '-=25.5px' }, 100);
-				$(this).dequeue();
-			});
+	if(!running) {
+		$('#hit')   .prop('disabled', true);
+		$('#stand') .prop('disabled', true);
+		$('#double').prop('disabled', true);
+		$('#split') .prop('disabled', true);
+		$('#insurance').prop('disabled', true);
+	}
+
+	if(opts === 'run') {
+		$('#hit')   .prop('disabled', false);
+		$('#stand') .prop('disabled', false);
+
+		if(player.checkWager(wager * 2)) {
+			$('#double').prop('disabled', false);
+		}
+	} else if(opts === 'split') {
+		$('#split').prop('disabled', false);
+	} else if(opts === 'insurance') {
+		$('#insurance').prop('disabled', false);
+	} else if(hand.length > 2) {
+		$('#double')   .prop('disabled', true);
+		$('#split')    .prop('disabled', true);
+		$('#insurance').prop('disabled', true);
+	}
+}
+
+function showBoard() {
+	deal.dealCard(4, 0, [player, dealer, player, dealer]);
+}
+
+function renderCard(ele, sender, type, item) {
+	var hand, i, card;
+
+	if(!item) {
+		hand = sender.getHand();
+		i    = hand.length - 1;
+		card = new Card(hand[i]);
+	} else {
+		hand = dealer.getHand();
+		card = new Card(hand[1]);
+	}
+
+	var	rank  = card.getRank(),
+			suit  = card.getSuit(),
+			color = 'red',
+			posx  = 402,
+			posy  = 182,
+			speed = 200,
+			cards = ele + ' .card-' + i;
+
+	if(i > 0) {
+		posx -= 50 * i;
+	}
+
+	if(!item) {
+		$(ele).append(
+			'<div class="card-' + i + ' ' + type + '">' + 
+				'<span class="pos-0">' +
+					'<span class="rank">&nbsp;</span>' +
+					'<span class="suit">&nbsp;</span>' +
+				'</span>' +
+				'<span class="pos-1">' +
+					'<span class="rank">&nbsp;</span>' +
+					'<span class="suit">&nbsp;</span>' +
+				'</span>' +
+			'</div>'
+		);
+
+		if(ele === '#phand') {
+			posy  = 360;
+			speed = 500;
+			$(ele + ' div.card-' + i).attr('id', 'pcard-' + i);
+
+			if(hand.length < 2) {
+				$('#pcard-0').popover({
+					animation: false,
+					container: '#pcard-0',
+					content: player.getScore(),
+					placement: 'left',
+					title: 'You Have',
+					trigger: 'manual'
+				});
+
+				setTimeout(function() {
+					$('#pcard-0').popover('show');
+					$('#pcard-0 .popover').css('display', 'none').fadeIn();
+				}, 500);
+			}
 		} else {
-			cards = item;
-		}
+			$(ele + ' div.card-' + i).attr('id', 'dcard-' + i);
 
-		if(type === 'up' || item) {
-			if(suit !== '&#9829;' && suit !== '&#9670;') {
-				color = 'black';
+			if(hand.length < 2) {
+				$('#dcard-0').popover({
+					container: '#dcard-0',
+					content: dealer.getScore(),
+					placement: 'left',
+					title: 'Dealer Has',
+					trigger: 'manual'
+				});
+
+				setTimeout(function() {
+					$('#dcard-0').popover('show');
+					$('#dcard-0 .popover').fadeIn();
+				}, 100);
 			}
-
-			$(cards).find('span[class*="pos"]').addClass(color);
-			$(cards).find('span.rank').html(rank);
-			$(cards).find('span.suit').html(suit);
 		}
+
+		$(ele + ' .card-' + i).css('z-index', i);
+
+		$(ele + ' .card-' + i).animate({
+			'top': posy,
+			'right': posx
+		}, speed);
+
+		$(ele).queue(function() {
+			$(this).animate({ 'left': '-=25.5px' }, 100);
+			$(this).dequeue();
+		});
+	} else {
+		cards = item;
 	}
 
-	function resetBoard() {
-		$('#dhand').html('');
-		$('#phand').html('');
-		$('#result').html('');
-		$('#phand, #dhand').css('left', 0);
+	if(type === 'up' || item) {
+		if(suit !== '&#9829;' && suit !== '&#9670;') {
+			color = 'black';
+		}
+
+		$(cards).find('span[class*="pos"]').addClass(color);
+		$(cards).find('span.rank').html(rank);
+		$(cards).find('span.suit').html(suit);
 	}
+}
 
-	function getWinner() {
-		var phand    = player.getHand(),
-				dhand    = dealer.getHand(),
-				pscore   = player.getScore(),
-				dscore   = dealer.getScore(),
-				wager    = player.getWager(),
-				winnings = 0,
-				result;
+function resetBoard() {
+	$('#dhand').html('');
+	$('#phand').html('');
+	$('#result').html('');
+	$('#phand, #dhand').css('left', 0);
+}
 
-		running = false;
-		setActions();
+function getWinner() {
+	var phand    = player.getHand(),
+			dhand    = dealer.getHand(),
+			pscore   = player.getScore(),
+			dscore   = dealer.getScore(),
+			wager    = player.getWager(),
+			winnings = 0,
+			result;
 
-		if(pscore > dscore) {
-			if(pscore === 21 && phand.length < 3) {
-				winnings = (wager * 2) + (wager / 2);
-				player.setCash(winnings);
-				player.setBank(winnings - wager);
-				$('#alert').removeClass('alert-info alert-error').addClass('alert-success');
-				result = 'Blackjack!';
-			} else if(pscore <= 21) {
-				winnings = wager * 2;
-				player.setCash(winnings);
-				player.setBank(winnings - wager);
-				$('#alert').removeClass('alert-info alert-error').addClass('alert-success');
-				result = 'You win!';
-			} else if(pscore > 21) {
+	running = false;
+	setActions();
+
+	if(pscore > dscore) {
+		if(pscore === 21 && phand.length < 3) {
+			winnings = (wager * 2) + (wager / 2);
+			player.setCash(winnings);
+			player.setBank(winnings - wager);
+			$('#alert').removeClass('alert-info alert-error').addClass('alert-success');
+			result = 'Blackjack!';
+		} else if(pscore <= 21) {
+			winnings = wager * 2;
+			player.setCash(winnings);
+			player.setBank(winnings - wager);
+			$('#alert').removeClass('alert-info alert-error').addClass('alert-success');
+			result = 'You win!';
+		} else if(pscore > 21) {
+			winnings -= wager;
+			player.setBank(winnings);
+			$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
+			result = 'Bust';
+		}
+	} else if(pscore < dscore) {
+		if(pscore <= 21 && dscore > 21) {
+			winnings = wager * 2;
+			player.setCash(winnings);
+			player.setBank(winnings - wager);
+			$('#alert').removeClass('alert-info alert-error').addClass('alert-success');
+			result = 'You win - dealer bust!';
+		} else if(dscore <= 21) {
+			winnings -= wager;
+			player.setBank(winnings);
+			$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
+			result = 'You lose!';
+		}
+	} else if(pscore === dscore) {
+		if(pscore <= 21) {
+			if(dscore === 21 && dhand.length < 3 && phand.length > 2) {
 				winnings -= wager;
 				player.setBank(winnings);
 				$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
-				result = 'Bust';
-			}
-		} else if(pscore < dscore) {
-			if(pscore <= 21 && dscore > 21) {
-				winnings = wager * 2;
-				player.setCash(winnings);
-				player.setBank(winnings - wager);
-				$('#alert').removeClass('alert-info alert-error').addClass('alert-success');
-				result = 'You win - dealer bust!';
-			} else if(dscore <= 21) {
-				winnings -= wager;
-				player.setBank(winnings);
-				$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
-				result = 'You lose!';
-			}
-		} else if(pscore === dscore) {
-			if(pscore <= 21) {
-				if(dscore === 21 && dhand.length < 3 && phand.length > 2) {
-					winnings -= wager;
-					player.setBank(winnings);
-					$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
-					result = 'You lose - dealer Blackjack!';
-				} else {
-					winnings = wager;
-					$('#alert').removeClass('alert-error alert-success').addClass('alert-info');
-					player.setCash(winnings);
-					result = 'Push';
-				}
+				result = 'You lose - dealer Blackjack!';
 			} else {
-				winnings -= wager;
-				player.setBank(winnings);
-				$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
-				result = 'Bust';
+				winnings = wager;
+				$('#alert').removeClass('alert-error alert-success').addClass('alert-info');
+				player.setCash(winnings);
+				result = 'Push';
 			}
-		}
-
-		showAlert(result);
-
-		dealer.flipCards();
-		dealer.updateBoard();
-
-		if(parseInt(player.getCash()) < 1) {
-			$('#myModal').modal();
-			$('#newGame').on('click', function() {
-				player.setCash(1000);
-				$(this).unbind('click');
-				$('#myModal').modal('hide');
-			});
+		} else {
+			winnings -= wager;
+			player.setBank(winnings);
+			$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
+			result = 'Bust';
 		}
 	}
+
+	showAlert(result);
+
+	dealer.flipCards();
+	dealer.updateBoard();
+
+	if(parseInt(player.getCash()) < 1) {
+		$('#myModal').modal();
+		$('#newGame').on('click', function() {
+			player.setCash(1000);
+			$(this).unbind('click');
+			$('#myModal').modal('hide');
+		});
+	}
+}
 
 /*****************************************************************/
 /*************************** Actions *****************************/
 /*****************************************************************/
 
-	$('#hit').on('click', function() {
-		socket.emit("game_event",{"pid":player.pid,"type":"hit"});
-	});
+$('#hit').on('click', function() {
+	socket.emit("game_event",{"pid":player.pid,"type":"hit"});
+});
 
-	$('#stand').on('click', function() {
-		socket.emit("game_event",{"pid":player.pid,"type":"stand"});
-	});
+$('#stand').on('click', function() {
+	socket.emit("game_event",{"pid":player.pid,"type":"stand"});
+});
 
-	$('#double').on('click', function() {
-		socket.emit("game_event",{"pid":player.pid,"type":"double"});
-	});
+$('#double').on('click', function() {
+	socket.emit("game_event",{"pid":player.pid,"type":"double"});
+});
 
-	$('#split').on('click', function() {
-		socket.emit("game_event",{"pid":player.pid,"type":"split"});
-	});
+$('#split').on('click', function() {
+	socket.emit("game_event",{"pid":player.pid,"type":"split"});
+});
 
-	$('#insurance').on('click', function() {
-		socket.emit("game_event",{"pid":player.pid,"type":"insure"});
-	});
+$('#insurance').on('click', function() {
+	socket.emit("game_event",{"pid":player.pid,"type":"insure"});
+});
 
 /*****************************************************************/
 /*************************** Loading *****************************/
 /*****************************************************************/
 
-	$('#wager').numOnly();
-	$('#actions:not(#wager), #game, #myModal').disableSelection();
-	$('#newGame, #cancel').on('click', function(e) { e.preventDefault(); });
-	$('#cancel').on('click', function() { $('#myModal').modal('hide'); });
-	$('#wager').val(100);
-	$('#cash span').html(player.getCash());
-	player.getBank();
+$('#wager').numOnly();
+$('#actions:not(#wager), #game, #myModal').disableSelection();
+$('#newGame, #cancel').on('click', function(e) { e.preventDefault(); });
+$('#cancel').on('click', function() { $('#myModal').modal('hide'); });
+$('#wager').val(100);
 
