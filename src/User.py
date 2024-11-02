@@ -32,4 +32,9 @@ class User(UserMixin):
     
     def set_sid(sid, self):
         self.sid = sid
+
+    def info(self):
+        return {"name" : self.name,
+                "balance" : self.balance,
+                "sid": self.sid}
     

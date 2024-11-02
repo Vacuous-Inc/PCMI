@@ -30,13 +30,13 @@ class Game:
     def __init__(self, players, namespace):
         self.players = [Player(x) for x in players]
         self.dealer = Dealer()
-        self.space = namespace
+        global space 
+        space = namespace
         self.count = 0
         
     def start(self):
         robot.start(len(self.players))
         cardData = camera.read_deal()
-        print(cardData)
 
         for i, p in enumerate(self.players):
             p.hand.append(cardData[2*i])
@@ -47,8 +47,14 @@ class Game:
         for p in self.players:
             p.has_blackjack()
         
+        self.dealer.hand.append(cardData[-2])
+        self.dealer.handValue += parse_card(cardData[-2])
         self.dealer.hand.append(cardData[-1])
-        p.handValue += parse_card(cardData[-1])
+        self.dealer.handValue += parse_card(cardData[-1])
+
+        emit("start", {"dealer":self.dealer.info()}, broadcast=True, namespace="/play")
+
+        self.players[self.count].take_turn()
 
     def dealer_turn(self):
         self.dealer.take_turn()
@@ -95,9 +101,10 @@ class Player:
         self.push = False
 
     
-    def take_turn(self, place):
-        while (not self.blackjack) and (not self.bust):
-            emit("turn", {"Player":self.user.name, "Info":self.info()}, namespace=self.space)
+    def take_turn(self):
+        if (not self.blackjack) and (not self.bust):
+            print(f"{self.user.name}'s turn")
+            emit("turn", {"Player":self.user.name, "Info":self.info()}, broadcast=True, namespace='/play')
 
 
     def hit(self, place):
@@ -131,7 +138,7 @@ class Player:
 
     def info(self):
         dict = {
-            "hand": self.hand,
+            "hand": [[x.rank, x.suit] for x in self.hand],
             "value": self.handValue,
             "wager": self.wager,
             "bust": self.bust,
@@ -173,7 +180,7 @@ class Dealer:
 
     def info(self):
         dict = {
-            "hand": self.hand,
+            "hand": [[x.rank, x.suit] for x in self.hand],
             "value": self.handValue,
             "wager": self.wager,
             "bust": self.bust,

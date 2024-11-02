@@ -7,58 +7,61 @@ socket.on("connect", function() {
 
 var player
 socket.on("connected", function(data){
+	
+	player = new Player(data["sid"], data["name"], data["balance"]);
 
-  sid = data.get("sid");
-
-  if (sid  == socket.id){
-    pid = data.get("pid");
-    cash = data.get("cash");
-  }
-
-  if (!player){
-    player = new Player(sid, pid, cash);
+	console.log("Hi my name is " + player.name);
 
 	$('#cash span').html(player.getCash());
 
 	player.getBank();
 
-  }
 
 });
 
+var dealer
 var text = document.getElementById("gameText");
-socket.on("start", function(msg) {
-  //console.log("starting the game")
-  text.innerText = "STARTING THE GAME"
+socket.on("start", function(data) {
+	//console.log("starting the game")
+	text.innerText = "STARTING THE GAME";
 
-  //Game();
+	dealer = new Player(null, "dealer", 10000)
+	console.log(data)
+	dealer.setHand(new Card(...data["dealer"]["hand"][0]))
+	dealer.setHand(new Card(...data["dealer"]["hand"][1]))
+	dealer.handValue = data["dealer"]["value"];
 
 });
 
 
-
+/*
 socket.on("game_event", function(data) {
 
   var parse = data
 
-  if (parse.get("player") == player.pid){
-
-
-
+  if (parse.get("Player") == player.name){
   }
   
 });
+*/
+
 
 socket.on("turn", function(data){
-	var parse = data
 	console.log("its someones turn")
+	console.log(data)
 
-  if (parse.get("player") == player.pid){
+  if (data["Player"] == player.name){
 
-	console.log("its my turn!")
+	console.log("its my turn!");
+
+	player.setHand(new Card(...data["Info"]["hand"][0]));
+	player.setHand(new Card(...data["Info"]["hand"][1]));
+	player.handValue = data["Info"]["value"];
 
 	setActions("run");
-	text.innerText = "Your turn " + player.pid
+	text.innerText = "Your turn " + player.name;
+
+	showBoard()
 
   }
 	
@@ -77,126 +80,104 @@ socket.on("turn", function(data){
 
 class Player {
 
-  	constructor(sid, pid, balance){
+  	constructor(sid, name, balance){
 		this.hand  = [],
 		this.wager = 0,
 		this.cash  = balance,
 		this.bank  = 0,
 		this.ele   = '',
 		this.score = '',
-		this.pid = pid;
+		this.handValue = 0,
+		this.name = name,
 		this.sid = sid;
 	}
 
 	getElements() {
 		if(this === player) {
-			ele   = '#phand';
-			score = '#pcard-0 .popover-content';
+			this.ele   = '#phand';
+			this.score = '#pcard-0 .popover-content';
 		} else {
-			ele   = '#dhand';
-			score = '#dcard-0 .popover-content';
+			this.ele   = '#dhand';
+			this.score = '#dcard-0 .popover-content';
 		}
 
-		return {'ele': ele, 'score': score};
+		return {'ele': this.ele, 'score': this.score};
 	};
 
 	getHand() {
-			return hand;
+			return this.hand;
 		};
 
 	setHand(card) {
-			hand.push(card);
+			this.hand.push(card);
 		};
 
  	resetHandfunction() {
-			hand = [];
+			this.hand = [];
 		};
 
 	getWager() {
-		return wager;
+		return this.wager;
 	};
 
 	setWager(money) {
-		wager += parseInt(money, 0);
+		this.wager += parseInt(money, 0);
 	};
 
 	resetWager() {
-		wager = 0;
+		this.wager = 0;
 	};
 
 	checkWager() {
-		return wager <= cash ? true : false;
+		return this.wager <= this.cash ? true : false;
 	};
 
 	getCash() {
-		return cash.formatMoney(2, '.', ',');
+		return formatMoney(this.cash, 2, '.', ',');
 	};
 
 	setCash(money) {
-		cash += money;
+		this.cash += money;
 		this.updateBoard();
 	};
 
 	getBank() {
-		$('#bank').html('Winnings: $' + bank.formatMoney(2, '.', ','));
+		$('#bank').html('Winnings: $' + formatMoney(this.bank, 2, '.', ','));
 
-		if(bank < 0) {
+		if(this.bank < 0) {
 			$('#bank').html('Winnings: <span style="color: #D90000">-$' + 
-			bank.formatMoney(2, '.', ',').toString().replace('-', '') + '</span>');
+			formatMoney(this.bank, 2, '.', ',').toString().replace('-', '') + '</span>');
 		}
 	};
 
 	setBank(money) {
-		bank += money;
+		this.bank += money;
 		this.updateBoard();
 	};
 
 	flipCards() {
 		$('.down').each(function() {
 			$(this).removeClass('down').addClass('up');
-			renderCard(false, false, false, $(this));
+			renderCard(false, false, false, 0, $(this));
 		});
 
 		$('#dcard-0 .popover-content').html(dealer.getScore());
 	};
+
+	getScore(){
+		return this.handValue
+	}
 }
 
-
-/*
-
-
-function Deck() {
-	var ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'],
-			suits = ['&#9824;', '&#9827;', '&#9829;', '&#9670;'],
-	hand = [],
-	card;
-
-	this.getDeck = function() {
-		return this.setDeck();
-	};
-
-	this.pushCard = function(rank, suit) {
-
-				card = new Card({'rank': rank});
-
-				hand.push({
-					'rank' : rank,
-					'suit' : suits[suit],
-					'value': card.getValue()
-				});
-
-		return hand;
-	};
-}
+var ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+var suits = ['&#9824;', '&#9827;', '&#9829;', '&#9670;'];
 
 class Card {
 
-constructor(){
-
-	this.ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-	this.suits = ['&#9824;', '&#9827;', '&#9829;', '&#9670;'];
-
-}
+	constructor(r,s){
+		this.rank = r
+		this.suit = suits[s]
+	}
 
 	getRank() {
 		return this.rank;
@@ -226,99 +207,44 @@ constructor(){
 	};
 }
 
-function Deal() {
-	var deck     = new Deck(),
-			shuffle  = new Shuffle(deck),
-			shuffled = shuffle.getShuffle(),
-			card;
+function dealCard(num, i, obj) {
 
-	this.getCard = function(sender) {
-		this.setCard(sender);
-		return card;
-	};
-
-	this.setCard = function(sender) {
-		card = shuffled[0];
-		shuffled.splice(card, 1);
-		sender.setHand(card);
-	};
-
-	this.dealCard = function(num, i, obj) {
 		if(i >= num) { return false; }
 
 		var sender   = obj[i],
-				elements = obj[i].getElements(),
-				score    = elements.score,
-				ele      = elements.ele,
-				dhand    = dealer.getHand();
-
-		deal.getCard(sender);
+			elements = obj[i].getElements(),
+			score    = elements.score,
+			ele      = elements.ele,
+			dhand    = dealer.getHand();
 
 		if(i < 3) {
-			renderCard(ele, sender, 'up');
+			renderCard(ele, sender, 'up', i%2);
 			$(score).html(sender.getScore());
 		} else {
-			renderCard(ele, sender, 'down');
+			renderCard(ele, sender, 'down', i%2);
 		}
 
 		if(player.getHand().length < 3) {
 			if(dhand.length > 0 && dhand[0].rank === 'A') {
 				setActions('insurance');
 			}
+	
+			dealer.flipCards();
+			$('#dscore span').html(dealer.getScore());
 
-			if(player.getScore() === 21) {
-				if(!blackjack) {
-					blackjack = true;
-					getWinner();
-				} else {
-					dealer.flipCards();
-					$('#dscore span').html(dealer.getScore());
-				}
-			} else {
-				if(dhand.length > 1) {
-					setActions('run');
-				}
+			if(dhand.length > 1) {
+				setActions('run');
 			}
 		}
 
 		function showCards() {
 			setTimeout(function() {
-				deal.dealCard(num, i + 1, obj);
+				dealCard(num, i + 1, obj);
 			}, 500);
 		}
 
 		clearTimeout(showCards());
-	};
-}
-
-function Game() {
-	this.newGame = function() {
-		var wager = $.trim($('#wager').val());
-
-		player.resetWager();
-		player.setWager(wager);
-
-		if(player.checkWager()) {
-			$('#deal').prop('disabled', true);
-			resetBoard();
-			player.setCash(-wager);
-
-			deal      = new Deal();
-			running   = true;
-			blackjack = false;
-			insured   = false;
-
-			player.resetHand();
-			dealer.resetHand();
-			showBoard();
-		} else {
-			player.setWager(-wager);
-			$('#alert').removeClass('alert-info alert-success').addClass('alert-error');
-			showAlert('Wager cannot exceed available cash!');
-		}
-	};
-}
-
+	}
 
 
 
@@ -409,26 +335,6 @@ function Game() {
 		}
 	};
 
-	Player.prototype.getScore = function() {
-		var hand  = this.getHand(),
-				score = 0,
-				aces  = 0,
-				i;
-
-		for(i = 0; i < hand.length; i++) {
-			score += hand[i].value;
-
-			if(hand[i].value === 11) { aces += 1; }
-
-			if(score > 21 && aces > 0) {
-				score -= 10;
-				aces--;
-			}
-		}
-
-		return score;
-	};
-
 	Player.prototype.updateBoard = function() {
 		var score = '#dcard-0 .popover-content';
 
@@ -441,9 +347,8 @@ function Game() {
 		player.getBank();
 	};
 
-	Number.prototype.formatMoney = function(c, d, t) {
-		var n = this, 
-		    s = n < 0 ? '-' : '',
+	function formatMoney(n, c, d, t) {
+		var s = n < 0 ? '-' : '',
 		    i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + '',
 		    j = i.length;
 		    j = j > 3 ? j % 3 : 0;
@@ -483,6 +388,7 @@ function showAlert(msg) {
 
 function setActions(opts) {
 	var hand = player.getHand();
+	running = false;
 
 	if(!running) {
 		$('#hit')   .prop('disabled', true);
@@ -511,21 +417,22 @@ function setActions(opts) {
 }
 
 function showBoard() {
-	deal.dealCard(4, 0, [player, dealer, player, dealer]);
+	dealCard(4, 0, [player, player, dealer, dealer]);
 }
 
-function renderCard(ele, sender, type, item) {
-	var hand, i, card;
+
+function renderCard(ele, sender, type, i, item) {
+	var hand, card;
 
 	if(!item) {
 		hand = sender.getHand();
-		i    = hand.length - 1;
-		card = new Card(hand[i]);
+		//i    = hand.length - 1;
+		card = hand[i];
 	} else {
 		hand = dealer.getHand();
-		card = new Card(hand[1]);
+		card = hand[1];
 	}
-
+	
 	var	rank  = card.getRank(),
 			suit  = card.getSuit(),
 			color = 'red',
@@ -533,10 +440,9 @@ function renderCard(ele, sender, type, item) {
 			posy  = 182,
 			speed = 200,
 			cards = ele + ' .card-' + i;
+	console.log(i)
 
-	if(i > 0) {
-		posx -= 50 * i;
-	}
+	posx -= 50 * i;
 
 	if(!item) {
 		$(ele).append(
@@ -593,6 +499,7 @@ function renderCard(ele, sender, type, item) {
 
 		$(ele + ' .card-' + i).css('z-index', i);
 
+		console.log(posx)
 		$(ele + ' .card-' + i).animate({
 			'top': posy,
 			'right': posx

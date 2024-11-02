@@ -2,6 +2,7 @@ from flask_socketio import Namespace, emit, join_room, leave_room, send, rooms, 
 from flask import request
 from flask_login import current_user
 
+from User import User
 from Game import Game
 global gameRoom 
 gameRoom = "gameRoom"
@@ -14,13 +15,14 @@ global game
 class Playing(Namespace):
 
     def on_connect(self):
-        print(f"{request.sid} connected to game")
+        print(f"{current_user.name} at {request.sid} connected to game")
         if len(players) < 4:
             join_room(gameRoom,request.sid)
-            current_user.sid = request.sid
-            players.append(current_user)
+            tempUser = User.get(current_user.id)
+            tempUser.sid = request.sid
+            players.append(tempUser)
         print(rooms(request.sid))
-        return "connected"
+        emit("connected", tempUser.info(), to=request.sid, namespace="/play")
 
     def on_disconnect(self):
         print(f"{request.sid} disconnected from game")
@@ -41,7 +43,7 @@ class Playing(Namespace):
         player = data.get("pid")
         game.hit(player)
 
-    def on_stand(self):
+    def on_stand(self, message):
         game.advance()
         print("STAND")
     
@@ -49,6 +51,13 @@ class Playing(Namespace):
         data = dict(message)
         event = data.get("type")
         player = data.get("pid")
+        match event:
+            case "hit":
+                game.hit(player)
+            case "stand":
+                game.advance()
+            case _:
+                pass
         print(f"{player} performed a {event}")
         
 
@@ -65,10 +74,10 @@ class Admin(Namespace):
         return "connected"
     
     def on_start_game(self):
+        global game
         print("starting game")
         game = Game(players, gameRoom)
-        emit("start", broadcast=True, namespace="/play")
-        send("started", namespace="/admin")
         game.start()
+        send("started", namespace="/admin")
         return "ok"
     

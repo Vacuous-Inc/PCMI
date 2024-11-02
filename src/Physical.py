@@ -65,9 +65,8 @@ class Robot:
 
 
     def start(self, numPlayers):
-        print(numPlayers)
-        deal = self.deck.deal((numPlayers*2) + 1)
-        print(deal)
+        print(f"players: {numPlayers}")
+        deal = self.deck.deal((numPlayers*2) + 2)
         self.camera.queue.extend(deal)
         print("dealing initial cards")
 
@@ -152,7 +151,5 @@ class Camera:
 
     def read_deal(self):
         hold = self.queue
-        print(hold)
         self.queue = []
-        print(hold)
         return hold
