@@ -35,7 +35,7 @@ from random_username.generate import generate_username
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
+app.config['SECRET_KEY'] = os.environ.get("PCMI_SECRET_KEY")
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")

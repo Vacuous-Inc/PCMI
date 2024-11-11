@@ -45,9 +45,8 @@ class Playing(Namespace):
 
     def on_stand(self, message):
         game.advance()
-        print("STAND")
     
-    def on_game_event(self, message):
+    '''def on_game_event(self, message):
         data = dict(message)
         event = data.get("type")
         player = data.get("pid")
@@ -58,7 +57,7 @@ class Playing(Namespace):
                 game.advance()
             case _:
                 pass
-        print(f"{player} performed a {event}")
+        print(f"{player} performed a {event}")'''
         
 
 
