@@ -73,13 +73,12 @@ class Robot:
     #moves arm to specified distance
     def extend(r, self):
         #angle constants
-        yPosition = -130
+        yPosition = 5
         psi = 90
 
         #lengths of components
         shoulderLength = 435
         forearmLength = 425
-        handLength = 145
         
         #initializing angles
         theta1 = atan(yPosition/r) - atan((forearmLength*sin(theta2))/(shoulderLength + forearmLength*cos(theta2)))
