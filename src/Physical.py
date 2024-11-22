@@ -75,9 +75,9 @@ class Robot:
         dc2 = (theta2/36) + 5
         dc3 = (theta3/36) + 5
         
-        #self.waist.ChangeDutyCycle(dc)
-        #self.shoulder.ChangeDutyCycle(dc*2)
-        #self.elbow.ChangeDutyCycle(dc_)
+        self.waist.ChangeDutyCycle(dc1)
+        self.shoulder.ChangeDutyCycle(dc2)
+        self.elbow.ChangeDutyCycle(dc3)
 
     #rotates arm to specified angle
     def rotate(theta,self):
