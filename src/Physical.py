@@ -6,6 +6,7 @@ from math import sqrt, atan, acos
 #import RPi.GPIO as GPIO
 from RPiSim.GPIO import GPIO
 import time
+import requests
 
 from Deck import Deck
 
@@ -18,47 +19,32 @@ GPIO.setwarnings(False)
 class Robot:
     def __init__(self):
 
-        #variables to store current position - not currently used
-        self.baseRotation = 0
-        self.armPosition = 0
-
-        #total distance from base to player
-        self.totalLength = 3
-
         #pin definitions
         self.basePin = 15
-        self.waistPin = 13
         self.shoulderPin = 11
         self.elbowPin = 14
         self.wristPin = 16
 
         #declare pins as output
-        #GPIO.setup([self.basePin, self.waistPin, self.shoulderPin, self.elbowPin, self.wristPin], GPIO.OUT)
-        [GPIO.setup(x, GPIO.OUT) for x in [self.basePin, self.waistPin, self.shoulderPin, self.elbowPin, self.wristPin]]
+        [GPIO.setup(x, GPIO.OUT) for x in [self.basePin, self.shoulderPin, self.elbowPin, self.wristPin]]
 
         #declare pins as PWM
         self.base = GPIO.PWM(self.basePin, 50)
-        self.waist = GPIO.PWM(self.waistPin, 50)
         self.shoulder = GPIO.PWM(self.shoulderPin, 50)
         self.elbow = GPIO.PWM(self.elbowPin, 50)
         self.wrist = GPIO.PWM(self.wristPin, 50)
 
         #start PWM and set angle to 0
         #self.base.start(0)
-        #self.waist.start(0)
         #self.shoulder.start(0)
         #self.elbow.start(0)
         #self.wrist.start(0)
-
-        #get our shuffler
-        self.shuffler = Shuffler()
 
         #get our pump
         self.pump = Pump()
 
         #get our camera
         self.camera = Camera()
-
 
         #testing values
         self.deck = Deck()
@@ -99,57 +85,54 @@ class Robot:
         self.move_to_coords(x2,y2)
         self.pump.release()
 
-    #wrap the shuffler
-    def shuffle(self):
-        self.shuffler.shuffle()
-
     def deal(self,pos):
-        self.camera.queue.extend(self.deck.deal(1))
+        self.camera.read_deal()
         print(f"Dealt 1 card to {pos}")
 
-#control the shuffler
-class Shuffler:
-    def __innit__(self):
-
-        #set up pins and output
-        self.shufflerPin = 18
-
-        GPIO.setup(self.shufflerPin, GPIO.OUT)
-
-    #performs one full shuffler
-    def shuffle(self):
-        #TODO write real code
-        GPIO.output(self.shufflerPin, GPIO.HIGH)
 
 #control the vaccuum punp
 class Pump:
     def __innit__(self):
-        self.pumpPin = 3
+        self.pumpPins = [2,3]
         self.valvePin = 5
 
-        GPIO.setup(self.pumpPin, GPIO.OUT)
+        GPIO.setup(self.pumpPins, GPIO.OUT)
         GPIO.setup(self.valvePin, GPIO.OUT)
     
     def pickup(self):
         #TODO tune sleep values
-        GPIO.output(self.pumpPin, GPIO.HIGH)
-        GPIO.output(self.valvePin, GPIO.LOW)
-        time.sleep(2)
-        GPIO.output(self.pumpPin, GPIO.LOW)
+        GPIO.output(self.valvePin, GPIO.HIGH)
+        GPIO.output(self.pumpPins, GPIO.HIGH)
         
 
     def release(self):
-        GPIO.output(self.valvePin, GPIO.HIGH)
+        GPIO.output(self.valvePin, GPIO.LOW)
+        GPIO.outpit(self.pumpPins, GPIO.LOW)
 
 
 
 #Class for handling card recoginition and camera i/o
 class Camera:
     def __init__(self):
+        self.read = {}
         self.queue = []
-        pass
+        self.cameraIP = "10.245.222.203:5000/data"
 
-    def read_deal(self):
-        hold = self.queue
-        self.queue = []
+    def get_deal(self, x):
+        hold = []
+        for _ in range(x):
+            hold.append = self.queue.pop(0)
         return hold
+
+    def getDealSpec(self,x): 
+        return self.queue.pop(x)
+        
+    def read_deal(self):
+        try:
+            cards = requests.get(self.cameraIP).json()["Cards"]
+            for c in cards:
+                if c not in self.read:
+                    self.read.add(c)
+                    self.queue.append(c)
+        except:
+            print("ERROR")

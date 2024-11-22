@@ -36,21 +36,24 @@ class Game:
         
     def start(self):
         robot.start(len(self.players))
-        cardData = camera.read_deal()
 
         for i, p in enumerate(self.players):
-            p.hand.append(cardData[2*i])
-            p.handValue += parse_card(cardData[2*i])
-            p.hand.append(cardData[(2*i)+1])
-            p.handValue += parse_card(cardData[(2*i)+1])
+            card1 = camera.getDealSpec(2*i)
+            card2 = camera.getDealSpec((2*i)+1)
+            p.hand.append(card1)
+            p.handValue += parse_card(card1)
+            p.hand.append(card2)
+            p.handValue += parse_card(card2)
         
         for p in self.players:
             p.has_blackjack()
         
-        self.dealer.hand.append(cardData[-2])
-        self.dealer.handValue += parse_card(cardData[-2])
-        self.dealer.hand.append(cardData[-1])
-        self.dealer.handValue += parse_card(cardData[-1])
+        card1 = camera.getDealSpec(-2)
+        card2 = camera.getDealSpec(-1)
+        self.dealer.hand.append(card1)
+        self.dealer.handValue += parse_card(card1)
+        self.dealer.hand.append(card2)
+        self.dealer.handValue += parse_card(card2)
 
         emit("start", {"dealer":self.dealer.info()}, broadcast=True, namespace="/play")
 
@@ -109,7 +112,7 @@ class Player:
 
     def hit(self, place):
         robot.deal(place)
-        newCard = camera.read_deal()
+        newCard = camera.get_deal(1)
         self.hand.append(newCard)
         self.handValue += parse_card(newCard)
         #Add a value to the handValue but idk how to do that just yet
@@ -123,7 +126,7 @@ class Player:
     def double_down(self, place):
         self.wager *= 2
         robot.deal(place)
-        newCard = camera.read_deal()
+        newCard = camera.get_deal(1)
         self.hand.append(newCard)
         self.handValue += parse_card(newCard)
         #Add a value to the handValue but idk how to do that just yet
@@ -161,7 +164,7 @@ class Dealer:
     
     def hit(place, self):
         robot.deal(place)
-        newCard = camera.read_deal()
+        newCard = camera.get_deal(1)
         self.hand.append(newCard)
         self.handValue += parse_card(newCard)
         #Add a value to the handValue but idk how to do that just yet

@@ -35,7 +35,7 @@ from random_username.generate import generate_username
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get("PCMI_SECRET_KEY")
+app.config['SECRET_KEY'] = "secret"
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
@@ -180,4 +180,4 @@ if __name__ == '__main__':
         print(e)
         pass
 
-    socketio.run(app,ssl_context='adhoc')
+    socketio.run(app,host="0.0.0.0",ssl_context='adhoc')
