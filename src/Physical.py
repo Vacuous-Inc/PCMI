@@ -74,7 +74,7 @@ class Robot:
     def extend(r, self):
         #angle constants
         yPosition = 5
-        psi = 90
+        psi = -90
 
         #lengths of components
         shoulderLength = 435
