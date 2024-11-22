@@ -2,7 +2,7 @@
 Class for interacting with the robotic arm and card shuffler
 '''
 
-from math import sqrt, atan, acos
+from math import sqrt, atan, acos, cos, sin
 #import RPi.GPIO as GPIO
 from RPiSim.GPIO import GPIO
 import time
@@ -24,7 +24,7 @@ class Robot:
 
         #total distance from base to player
         self.totalLength = 3
-
+        
         #pin definitions
         self.basePin = 15
         self.waistPin = 13
@@ -71,11 +71,24 @@ class Robot:
         print("dealing initial cards")
 
     #moves arm to specified distance
-    def extend(r,self):
-        theta = acos(r/self.totalLength)
+    def extend(r, self):
+        #angle constants
+        yPosition = -130
+        psi = 90
 
-        dc = (theta/36) + 5
-        dc_ = ((90-theta)/36) + 5
+        #lengths of components
+        shoulderLength = 435
+        forearmLength = 425
+        handLength = 145
+        
+        #initializing angles
+        theta1 = atan(yPosition/r) - atan((forearmLength*sin(theta2))/(shoulderLength + forearmLength*cos(theta2)))
+        theta2 = acos((r^2 + yPosition^2 - (shoulderLength)^2 - (forearmLength)^2)/(2*shoulderLength*forearmLength))
+        theta3 = psi - theta1 - theta2
+
+        dc1 = (theta1/36) + 5
+        dc2 = (theta2/36) + 5
+        dc3 = (theta3/36) + 5
         
         #self.waist.ChangeDutyCycle(dc)
         #self.shoulder.ChangeDutyCycle(dc*2)
