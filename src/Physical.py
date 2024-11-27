@@ -20,10 +20,10 @@ class Robot:
     def __init__(self):
 
         #pin definitions
-        self.basePin = 15
-        self.shoulderPin = 11
-        self.elbowPin = 14
-        self.wristPin = 16
+        self.basePin = 6
+        self.shoulderPin = 13
+        self.elbowPin = 19
+        self.wristPin = 26
 
         #declare pins as output
         [GPIO.setup(x, GPIO.OUT) for x in [self.basePin, self.shoulderPin, self.elbowPin, self.wristPin]]
@@ -35,10 +35,15 @@ class Robot:
         self.wrist = GPIO.PWM(self.wristPin, 50)
 
         #start PWM and set angle to 0
-        #self.base.start(0)
-        #self.shoulder.start(0)
-        #self.elbow.start(0)
-        #self.wrist.start(0)
+        #self.base.start(2)
+        #elf.shoulder.start(2)
+        #self.elbow.start(2)
+        #self.wrist.start(2)
+
+        self.baseTheta = 0
+        self.shoulderTheta = 0
+        self.elbowTheta = 0
+        self.wristTheta = 0
 
         #get our pump
         self.pump = Pump()
@@ -52,12 +57,15 @@ class Robot:
 
     def start(self, numPlayers):
         print(f"players: {numPlayers}")
-        deal = self.deck.deal((numPlayers*2) + 2)
-        self.camera.queue.extend(deal)
+        for i in range((numPlayers*2) + 2):
+            self.camera.read_deal(self.deck)
         print("dealing initial cards")
 
     #moves arm to specified distance
     def extend(r, self):
+
+        tolerance = 0.01
+
         #angle constants
         yPosition = 5
         psi = -90
@@ -68,21 +76,42 @@ class Robot:
         
         #initializing angles
         theta1 = atan(yPosition/r) - atan((forearmLength*sin(theta2))/(shoulderLength + forearmLength*cos(theta2)))
-        theta2 = acos((r^2 + yPosition^2 - (shoulderLength)^2 - (forearmLength)^2)/(2*shoulderLength*forearmLength))
-        theta3 = psi - theta1 - theta2
+        theta2 = 180 - (acos((r^2 + yPosition^2 - (shoulderLength)^2 - (forearmLength)^2)/(2*shoulderLength*forearmLength)))
+        theta3 = 180 - (psi - theta1 - theta2)
 
-        dc1 = (theta1/36) + 5
-        dc2 = (theta2/36) + 5
-        dc3 = (theta3/36) + 5
+        offset = self.shoulderTheta - theta1
+        while abs(offset) > tolerance:
+            dc1 = ((self.shoulderTheta-(offset/100))/18) + 2
+            offset -= offset/100
+            self.shoulder.ChangeDutyCycle(dc1)
+            time.sleep(0.01)
+
         
-        self.waist.ChangeDutyCycle(dc1)
-        self.shoulder.ChangeDutyCycle(dc2)
-        self.elbow.ChangeDutyCycle(dc3)
+        offset = self.elbowTheta - theta2
+        while abs(offset) > tolerance:
+            dc1 = ((self.elbowTheta-(offset/100))/18) + 2
+            offset -= offset/100
+            self.elbow.ChangeDutyCycle(dc1)
+            time.sleep(0.01)
+
+        
+        offset = self.wristTheta - theta3
+        while abs(offset) > tolerance:
+            dc1 = ((self.wristTheta-(offset/100))/18) + 2
+            offset -= offset/100
+            self.wrist.ChangeDutyCycle(dc1)
+            time.sleep(0.01)
 
     #rotates arm to specified angle
     def rotate(theta,self):
-        dc = (theta/36) + 5
-        #self.base.ChangeDutyCycle(dc)
+        tolerance = 0.01
+
+        offset = self.baseTheta - theta
+        while abs(offset) > tolerance:
+            dc1 = ((self.baseTheta-(offset/100))/20) + 2
+            offset -= offset/100
+            self.base.ChangeDutyCycle(dc1)
+            time.sleep(0.01)
 
     #moves hand to specied point
     def move_to_coords(x,y,self):
@@ -98,7 +127,7 @@ class Robot:
         self.pump.release()
 
     def deal(self,pos):
-        self.camera.read_deal()
+        self.camera.read_deal(self.deck)
         print(f"Dealt 1 card to {pos}")
 
 
@@ -106,7 +135,7 @@ class Robot:
 class Pump:
     def __innit__(self):
         self.pumpPins = [2,3]
-        self.valvePin = 5
+        self.valvePin = 4
 
         GPIO.setup(self.pumpPins, GPIO.OUT)
         GPIO.setup(self.valvePin, GPIO.OUT)
@@ -139,7 +168,8 @@ class Camera:
     def getDealSpec(self,x): 
         return self.queue.pop(x)
         
-    def read_deal(self):
+    def read_deal(self,deck):
+        '''
         try:
             cards = requests.get(self.cameraIP).json()["Cards"]
             for c in cards:
@@ -148,3 +178,6 @@ class Camera:
                     self.queue.append(c)
         except:
             print("ERROR")
+        '''
+        deal = deck.deal(1)
+        self.queue.extend(deal)

@@ -19,7 +19,8 @@ fonttools==4.55.0
 fsspec==2024.10.0
 google==3.0.0
 google-auth==2.35.0
-GPIOSimulator==0.1
+#GPIOSimulator==0.1
+Rpi.GPIO
 h11==0.14.0
 httplib2==0.22.0
 idna==3.10
