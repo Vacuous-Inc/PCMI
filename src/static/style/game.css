@@ -1,6 +1,17 @@
 div[id*="pcard"] .popover { left: -95px !important; }
 div[id*="dcard"] .popover { left: -105px !important; }
 
+#section {
+	float: top;
+	width: 70%;
+	height: 100%;
+}
+
+#aside {
+	float: bottom;
+	width: 27%;
+}
+
 #wrapper {
 	margin: 0 auto;
 	width: 1000px;
@@ -144,4 +155,17 @@ input#wager { margin-left: 5px; position: relative; top: 4px }
 	top: 34.5%;
 	width: 500px;
 	z-index: 0;
+}
+
+@media only screen and (min-width: 1000px) {
+	#section {
+		float: left;
+		width: 70%;
+		height: 100%;
+	}
+
+	#aside {
+		float: right;
+		width: 27%;
+	}
 }

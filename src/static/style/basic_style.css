@@ -1,0 +1,180 @@
+.button {
+    background-color: rgb(112, 112, 112);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    grid-area: lower;
+    
+  }
+
+.button2 {
+    background-color: rgb(112, 112, 112);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    grid-area: lower2;
+}
+  
+.button1:hover {
+    background-color: #01854b;
+    color: white;
+}
+
+p {
+    margin-right: 10px;
+}
+
+body {
+    background-color: #f8f8f8;
+    font-family:coromant garamond;
+    text-align:center;
+    background-image: url("/static/res/why.jpg");
+    background-position: center;
+    background-color: rgba(255,255,255,0.6);
+    background-blend-mode: lighten;
+    height: 100%;
+    font-size: 3em;
+}
+
+footer {
+    text-align: right;
+    font-weight: bold;
+}
+
+.title {
+    font-family:proza libre;
+    color:#37e783;
+    font-size: 1.75em;
+    grid-area: title;
+}
+
+.head-info {
+    background-color: rgb(100, 100, 100, 0.7);
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    grid-area: section2;
+    display: grid;
+    grid-template-areas: 
+        'title title title title'
+        'image image image image'
+        'description description description description'
+        '. lower lower2 .'
+        '. . . .';
+    grid-template-columns: 3% 47% 47% 3%;
+    grid-template-rows: 25% 50% 15% 8% 2%;
+    height: 90%;
+    
+}
+
+.head-info img {
+    height: 100%;
+    width: auto;
+    grid-area: image;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.head-info .button1:hover {
+    grid-area: first;
+}
+
+.head-info .button2:hover {
+    grid-area: second;
+}
+
+.rounded {
+    border-radius: 25px; 
+}
+
+.head-info p {
+    padding-bottom: 10px;
+    color: white;
+    grid-area: description;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-areas:
+        '.'
+        'section2'
+        '.';
+    grid-template-columns: 100%;
+    grid-template-rows: 5% 90% 5%;
+    height: 100%;
+}
+
+#buttons-div {
+    visibility: hidden;
+}
+
+html {
+    height: 100%;
+}
+
+@media only screen and (min-width: 1000px) { 
+    .grid-container {
+        display: grid;
+        grid-template-areas: 
+            '. . section1'
+            '. section2 .'
+            '. . section3';
+        grid-template-columns: 25% 50% 25%;
+        grid-template-rows: 20% 60% 20%;
+        height: 100%;
+    }
+    
+    body {
+        font-size: 1em;
+    }
+
+    .head-info {
+        width: 100%;
+        grid-area: section2;
+        display: grid;
+        grid-template-areas:
+            '. . .' 
+            'image . .'
+            'image . .'
+            'image title .'
+            '. . .'
+            'description description description';
+        grid-template-columns: 54% 44% 2%;
+        grid-template-rows: 5% 5% 5% 60% 5% 20%;
+    }
+
+    .head-info a {
+        visibility: hidden;
+    }
+
+    #buttons-div {
+        visibility: visible;
+        grid-area: section1;
+    }
+
+    .button {
+        border: none;
+        color: white;
+        padding: 6px 12px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        margin: 4px 2px;
+        transition-duration: 0.4s;
+        cursor: pointer;
+        margin-right: 6px;
+        
+      }
+}
