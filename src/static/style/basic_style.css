@@ -86,14 +86,13 @@ footer {
     margin-left: auto;
     margin-right: auto;
 }
-
-.head-info .button1:hover {
+/*.head-info .button1:hover {
     grid-area: first;
 }
 
 .head-info .button2:hover {
     grid-area: second;
-}
+}*/
 
 .rounded {
     border-radius: 25px; 
