@@ -36,10 +36,10 @@ class Robot:
         self.wrist = GPIO.PWM(self.wristPin, 50)
 
         #start PWM and set angle to 0
-        #self.base.start(2)
-        #elf.shoulder.start(2)
-        #self.elbow.start(2)
-        #self.wrist.start(2)
+        self.base.start(2)
+        self.shoulder.start(2)
+        self.elbow.start(2)
+        self.wrist.start(2)
 
         self.baseTheta = 0
         self.shoulderTheta = 0
@@ -59,9 +59,8 @@ class Robot:
     def start(self, numPlayers):
         print(f"players: {numPlayers}")
         for i in range((numPlayers*2) + 2):
-            time.sleep(2)
             self.camera.read_deal(self.deck)
-        print(f"dealing initial cards{self.camera.get_deal(2)}")
+        #print(f"dealing initial cards{self.camera.get_deal(2)}")
 
     #moves arm to specified distance
     def extend(self, r):
@@ -99,7 +98,7 @@ class Robot:
         self.pump.release()
 
     def deal(self,pos):
-        self.extend("d")
+        '''self.extend("d")
         self.pump.pickup()
         self.wrist.ChangeDutyCycle(2)
         time.sleep(1)
@@ -107,7 +106,8 @@ class Robot:
         print(f"Dealt 1 card to {pos}")
         self.shoulder.ChangeDutyCycle(4)
         self.extend("p")
-        self.pump.release()
+        self.pump.release()'''
+        self.camera.read_deal(self.deck)
         
 
 
@@ -153,7 +153,7 @@ class Camera:
         return []
         
     def read_deal(self,deck):
-
+        '''
         cards = requests.get(self.cameraIP).json()["Cards"]
         for c in cards:
             print(c)
@@ -164,4 +164,4 @@ class Camera:
         '''
         deal = deck.deal(1)
         self.queue.extend(deal)
-        '''
+        

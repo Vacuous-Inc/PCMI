@@ -176,7 +176,15 @@ class Card {
 
 	constructor(r,s){
 		this.rank = r
-		this.suit = suits[s]
+		if (s=="s"){
+			this.suit = suits[0]
+		}else if (s=="c"){
+			this.suit = suits[1]
+		}else if (s=="h"){
+			this.suit = suits[2]
+		}else{
+			this.suit = suits[3]
+		}
 	}
 
 	getRank() {

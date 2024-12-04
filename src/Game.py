@@ -22,7 +22,7 @@ def parse_card(card):
     elif rank in FACES:
         return 10
     else:
-        return rank
+        return int(rank)
 
 
 class Game:
