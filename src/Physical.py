@@ -9,6 +9,7 @@ import time
 import requests
 
 from Deck import Deck
+from Card import Card
 
 
 GPIO.setmode(GPIO.BCM)
@@ -72,20 +73,18 @@ class Robot:
         elif r == "d":
             self.shoulder.ChangeDutyCycle(3.5)
             self.elbow.ChangeDutyCycle(8.7)
-            self.wrist.ChangeDutyCycle(2)
+            self.wrist.ChangeDutyCycle(8)
 
 
     #rotates arm to specified angle
     def rotate(theta,self):
-        tolerance = 0.01
-
-        offset = self.baseTheta - theta
-        while abs(offset) > tolerance:
-            dc1 = ((self.baseTheta-(offset/100))/20) + 2
-            offset -= offset/100
-            self.base.ChangeDutyCycle(dc1)
-            time.sleep(0.01)
-
+        if theta == 0:
+            self.base.ChangeDutyCycle(3.5)
+        elif theta == 1:
+            self.base.ChangeDutyCycle(7.5)
+        elif theta == 2:
+            self.base.ChangeDutyCycle(11)            
+    
     #moves hand to specied point
     def move_to_coords(x,y,self):
         self.extend(sqrt(x**2 + y**2))
@@ -100,14 +99,22 @@ class Robot:
         self.pump.release()
 
     def deal(self,pos):
+        self.extend("d")
+        self.pump.pickup()
+        self.wrist.ChangeDutyCycle(2)
+        time.sleep(1)
         self.camera.read_deal(self.deck)
         print(f"Dealt 1 card to {pos}")
+        self.shoulder.ChangeDutyCycle(4)
+        self.extend("p")
+        self.pump.release()
+        
 
 
 #control the vaccuum punp
 class Pump:
     def __innit__(self):
-        self.pumpPins = [2,3]
+        self.pumpPins = 2
         self.valvePin = 4
 
         GPIO.setup(self.pumpPins, GPIO.OUT)
@@ -146,13 +153,13 @@ class Camera:
         return []
         
     def read_deal(self,deck):
-        
+
         cards = requests.get(self.cameraIP).json()["Cards"]
         for c in cards:
             print(c)
             if c not in self.read:
                 self.read.add(c)
-                self.queue.append(c)
+                self.queue.append(Card(c))
 
         '''
         deal = deck.deal(1)
