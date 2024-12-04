@@ -60,9 +60,7 @@ def watch():
 @app.route("/admin", methods=["GET"])
 @login_required
 def admin():
-    if current_user.is_admin():
-        return render_template("admin.html")
-    return redirect("/login")
+    return render_template("admin.html")
 
 
 def get_google_provider_cfg():

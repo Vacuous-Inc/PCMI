@@ -58,49 +58,22 @@ class Robot:
     def start(self, numPlayers):
         print(f"players: {numPlayers}")
         for i in range((numPlayers*2) + 2):
+            time.sleep(2)
             self.camera.read_deal(self.deck)
-        print("dealing initial cards")
+        print(f"dealing initial cards{self.camera.get_deal(2)}")
 
     #moves arm to specified distance
-    def extend(r, self):
+    def extend(self, r):
 
-        tolerance = 0.01
+        if r == "p":
+            self.shoulder.ChangeDutyCycle(3.1)
+            self.elbow.ChangeDutyCycle(5.5)
+            self.wrist.ChangeDutyCycle(7.6)
+        elif r == "d":
+            self.shoulder.ChangeDutyCycle(3.5)
+            self.elbow.ChangeDutyCycle(8.7)
+            self.wrist.ChangeDutyCycle(2)
 
-        #angle constants
-        yPosition = 5
-        psi = -90
-
-        #lengths of components
-        shoulderLength = 435
-        forearmLength = 425
-        
-        #initializing angles
-        theta1 = atan(yPosition/r) - atan((forearmLength*sin(theta2))/(shoulderLength + forearmLength*cos(theta2)))
-        theta2 = 180 - (acos((r^2 + yPosition^2 - (shoulderLength)^2 - (forearmLength)^2)/(2*shoulderLength*forearmLength)))
-        theta3 = 180 - (psi - theta1 - theta2)
-
-        offset = self.shoulderTheta - theta1
-        while abs(offset) > tolerance:
-            dc1 = ((self.shoulderTheta-(offset/100))/18) + 2
-            offset -= offset/100
-            self.shoulder.ChangeDutyCycle(dc1)
-            time.sleep(0.01)
-
-        
-        offset = self.elbowTheta - theta2
-        while abs(offset) > tolerance:
-            dc1 = ((self.elbowTheta-(offset/100))/18) + 2
-            offset -= offset/100
-            self.elbow.ChangeDutyCycle(dc1)
-            time.sleep(0.01)
-
-        
-        offset = self.wristTheta - theta3
-        while abs(offset) > tolerance:
-            dc1 = ((self.wristTheta-(offset/100))/18) + 2
-            offset -= offset/100
-            self.wrist.ChangeDutyCycle(dc1)
-            time.sleep(0.01)
 
     #rotates arm to specified angle
     def rotate(theta,self):
@@ -155,29 +128,33 @@ class Pump:
 #Class for handling card recoginition and camera i/o
 class Camera:
     def __init__(self):
-        self.read = {}
+        self.read = set()
         self.queue = []
-        self.cameraIP = "10.245.222.203:5000/data"
+        self.cameraIP = "http://10.245.118.108:5000/data"
 
     def get_deal(self, x):
+        
         hold = []
-        for _ in range(x):
-            hold.append = self.queue.pop(0)
+        if self.queue:
+            for _ in range(x):
+                hold.append(self.queue.pop(0))
         return hold
 
     def getDealSpec(self,x): 
-        return self.queue.pop(x)
+        if self.queue:
+            return self.queue.pop(x)
+        return []
         
     def read_deal(self,deck):
-        '''
-        try:
-            cards = requests.get(self.cameraIP).json()["Cards"]
-            for c in cards:
-                if c not in self.read:
-                    self.read.add(c)
-                    self.queue.append(c)
-        except:
-            print("ERROR")
+        
+        cards = requests.get(self.cameraIP).json()["Cards"]
+        for c in cards:
+            print(c)
+            if c not in self.read:
+                self.read.add(c)
+                self.queue.append(c)
+
         '''
         deal = deck.deal(1)
         self.queue.extend(deal)
+        '''
