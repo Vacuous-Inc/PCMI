@@ -73,7 +73,7 @@ class Robot:
         elif r == "d":
             self.shoulder.ChangeDutyCycle(3.5)
             self.elbow.ChangeDutyCycle(8.7)
-            self.wrist.ChangeDutyCycle(8)
+            self.wrist.ChangeDutyCycle(7.5)
 
 
     #rotates arm to specified angle
