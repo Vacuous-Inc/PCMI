@@ -58,8 +58,9 @@ class Robot:
     def start(self, numPlayers):
         print(f"players: {numPlayers}")
         for i in range((numPlayers*2) + 2):
+            time.sleep(2)
             self.camera.read_deal(self.deck)
-        print("dealing initial cards")
+        print(f"dealing initial cards{self.camera.get_deal(2)}")
 
     #moves arm to specified distance
     def extend(self, r):
@@ -127,29 +128,33 @@ class Pump:
 #Class for handling card recoginition and camera i/o
 class Camera:
     def __init__(self):
-        self.read = {}
+        self.read = set()
         self.queue = []
-        self.cameraIP = "10.245.222.203:5000/data"
+        self.cameraIP = "http://10.245.118.108:5000/data"
 
     def get_deal(self, x):
+        
         hold = []
-        for _ in range(x):
-            hold.append = self.queue.pop(0)
+        if self.queue:
+            for _ in range(x):
+                hold.append(self.queue.pop(0))
         return hold
 
     def getDealSpec(self,x): 
-        return self.queue.pop(x)
+        if self.queue:
+            return self.queue.pop(x)
+        return []
         
     def read_deal(self,deck):
-        '''
-        try:
-            cards = requests.get(self.cameraIP).json()["Cards"]
-            for c in cards:
-                if c not in self.read:
-                    self.read.add(c)
-                    self.queue.append(c)
-        except:
-            print("ERROR")
+        
+        cards = requests.get(self.cameraIP).json()["Cards"]
+        for c in cards:
+            print(c)
+            if c not in self.read:
+                self.read.add(c)
+                self.queue.append(c)
+
         '''
         deal = deck.deal(1)
         self.queue.extend(deal)
+        '''
