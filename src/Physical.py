@@ -50,6 +50,9 @@ class Robot:
         #get our pump
         self.pump = Pump()
 
+        GPIO.setup(2, GPIO.OUT)
+        GPIO.setup(4, GPIO.OUT)
+
         #get our camera
         self.camera = Camera()
 
@@ -78,7 +81,7 @@ class Robot:
             self.shoulder.start(8.5)
             self.elbow.start(8)
             self.wrist.start(12)
-            self.shoulder.start(8)
+            self.shoulder.start(7.75)
 
 
     #rotates arm to specified angle
@@ -109,6 +112,7 @@ class Robot:
     def deal(self,pos):
         self.extend("c")
         self.pump.pickup()
+        time.sleep(3)
         self.wrist.start(3)
         #self.camera.read_deal(self.deck)
         time.sleep(3)
