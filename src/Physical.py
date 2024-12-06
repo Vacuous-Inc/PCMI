@@ -72,8 +72,8 @@ class Robot:
         if r == "p":
             self.wrist.start(7)
             time.sleep(0.5)
-            self.shoulder.start(5.5)
             self.elbow.start(2)
+            self.shoulder.start(5.5)
         elif r == "d":
             self.wrist.start(7.15)
             time.sleep(0.5)
