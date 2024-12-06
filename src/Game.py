@@ -25,6 +25,9 @@ def parse_card(card):
         return int(rank)
 
 
+'''
+Class for managing game flow
+'''
 class Game:
 
     def __init__(self, players, namespace):
@@ -92,6 +95,10 @@ class Game:
             p.hit()
 
 
+
+'''
+Class for interfacing a player
+'''
 class Player:
     def __init__(self, user):
         self.user = user
@@ -149,6 +156,10 @@ class Player:
         }
         return dict
 
+
+'''
+Class for controlling the dealer
+'''
 class Dealer:
     def __init__(self):
         self.hand = []

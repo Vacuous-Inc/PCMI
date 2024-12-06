@@ -1,5 +1,5 @@
 '''
-Code to control the camera
+Code to control the camera and provide access to values from main program. To be run on seperate pi.
 '''
 
 from flask import Flask, jsonify

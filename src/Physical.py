@@ -1,8 +1,8 @@
 '''
-Class for interacting with the robotic arm and card shuffler
+Class for interacting with the robotic arm, pumps, and camera
 '''
 
-from math import sqrt, atan, acos, cos, sin
+from math import sqrt, atan
 #import RPi.GPIO as GPIO
 from RPiSim.GPIO import GPIO
 import time
@@ -60,7 +60,7 @@ class Robot:
     def start(self, numPlayers):
         print(f"players: {numPlayers}")
         for i in range((numPlayers*2) + 2):
-            self.camera.read_deal(self.deck)
+            self.deal(i%numPlayers)
         #print(f"dealing initial cards{self.camera.get_deal(2)}")
 
     #moves arm to specified distance
@@ -104,12 +104,13 @@ class Robot:
         self.move_to_coords(x2,y2)
         self.pump.release()
 
+    #deals a card to correct location
     def deal(self,pos):
         self.extend("c")
         self.pump.pickup()
         self.wrist.ChangeDutyCycle(3)
-        time.sleep(2)
         self.camera.read_deal(self.deck)
+        time.sleep(3)
         print(f"Dealt 1 card to {pos}")
         self.shoulder.ChangeDutyCycle(7.5)
         self.rotate(pos)

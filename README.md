@@ -1,6 +1,14 @@
 # PCMI: Playing Card Manipulation Initiative
-Full PCMI Codebase
+Full PCMI Codebase for CS2210 final project Fall 2024.
 
+Group Members:
+
+- Alexis Carey
+- Aurelia Kornheiser
+- Lila Sargent
+- Tovahn Vitols
+
+<br><br>
 
 # Instructions:
 
@@ -23,6 +31,26 @@ Alternatively, change the value in [Constants.py](Constants.py)
 ### Authentication
 
 Please change Google Authentication Client to the right endpoint.
+
+### Starting the game
+
+Once all the players have connnected you may nagivate to the */admin* path and, assuming you are an admin user, press the start game button to beign a round.
+
+### Managing the Database
+- Add a new admin
+
+    Enter the username of the user you would like to make a new admin in the [make_admin.sql](make_admin.sql) file and run the file in a SQL interface such as DB Browser
+
+- Delete Guest Users
+
+    In order to reduce the size of the database it is advantagous to routinely delete guest users. This may be accomplished by running the [DELETE_GUESTS.sql](DELETE_GUESTS.sql) file in a SQL interface such as DB Browser
+
+### Physical Setup
+
+Must be wired according to wiring diagram. *Full diagram and instructions to be added at a later date.*
+
+---
+<br><br>
 
 # Attribution
 

@@ -1,3 +1,7 @@
+'''
+Controls socket connections and namespaces for continous interaction with the user.
+'''
+
 from flask_socketio import Namespace, emit, join_room, leave_room, send, rooms, ConnectionRefusedError
 from flask import request
 from flask_login import current_user
@@ -12,6 +16,7 @@ players = []
 
 global game
 
+#Name space of those players currently in the game
 class Playing(Namespace):
 
     def on_connect(self):
@@ -45,28 +50,15 @@ class Playing(Namespace):
 
     def on_stand(self, message):
         game.advance()
-    
-    '''def on_game_event(self, message):
-        data = dict(message)
-        event = data.get("type")
-        player = data.get("pid")
-        match event:
-            case "hit":
-                game.hit(player)
-            case "stand":
-                game.advance()
-            case _:
-                pass
-        print(f"{player} performed a {event}")'''
         
 
-
+#Not currently used
 class Home(Namespace):
     def on_connect(self):
         print("test")
         
     
-
+#Namespace for allowing interaction with the admin interface
 class Admin(Namespace):
     def on_connect(self):
         print("admin connected")

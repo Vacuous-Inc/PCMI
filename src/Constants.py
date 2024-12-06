@@ -1,3 +1,7 @@
+'''
+Code for referencing ip changes. Thanks UVM wifi...
+'''
+
 import requests
 
 def MainIP():

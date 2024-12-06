@@ -1,4 +1,9 @@
-# http://flask.pocoo.org/docs/1.0/tutorial/database/
+'''
+Code for creating and managing the database. 
+
+Modified from http://flask.pocoo.org/docs/1.0/tutorial/database/
+'''
+
 import sqlite3
 
 import click

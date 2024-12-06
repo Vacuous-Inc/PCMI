@@ -4,7 +4,9 @@ Default Profile Picture by raptor from <a href="https://thenounproject.com/brows
 
 PCMI Logo Generated from Chat GPT 4o by Tovahn Vitols
 
-Card Animation Adapted From: https://codepen.io/Clowerweb/pen/AVpJvr
+Card Animation Adapted From: [https://codepen.io/Clowerweb/pen/AVpJvr](https://codepen.io/Clowerweb/pen/AVpJvr)
+
+Database integration code (*[db.py](db.py)*) modified from [http://flask.pocoo.org/docs/1.0/tutorial/database/](http://flask.pocoo.org/docs/1.0/tutorial/database/)
 
 Resources used for detection model
 - [Getting Started with YOLO](https://core-electronics.com.au/guides/getting-started-with-yolo-object-and-animal-recognition-on-the-raspberry-pi/)

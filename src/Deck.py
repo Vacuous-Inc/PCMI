@@ -1,3 +1,7 @@
+'''
+Class for testing card interactions
+'''
+
 from Card import Card
 from random import choices
 

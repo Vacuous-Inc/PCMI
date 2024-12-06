@@ -1,5 +1,5 @@
 '''
-Main Code for creating the Web Interface
+Main Code for creating the Web Interface and managing other services
 '''
 
 ###IMPORTS###
@@ -73,51 +73,10 @@ def load_user(user_id):
 @app.route("/login")
 def login():
     return render_template("login.html", client=GOOGLE_CLIENT_ID, ip=MainIP())
-
-'''
-@app.route("/login/google")
-def google():
-    # Find out what URL to hit for Google login
-    google_provider_cfg = get_google_provider_cfg()
-    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
-
-    # Use library to construct the request for Google login and provide
-    # scopes that let you retrieve user's profile from Google
-    request_uri = client.prepare_request_uri(
-        authorization_endpoint,
-        redirect_uri=request.base_url + "/callback",
-        scope=["openid", "email", "profile"],
-    )
-    return redirect(request_uri)
-
-@app.route("/login/local",methods=["POST"])
-def callback():
-    token = request.form.get("auth_token")
-
-    user = User.get(unique_id)
-
-    if not user:
-        User.create(unique_id, users_name, users_email, picture)
-        user = User.get(unique_id)
-
-    # Begin user session by logging the user in
-    login_user(user)
-
-    # Send user back to homepage
-    return redirect("/play")'''
     
 
 @app.route("/login/callback",methods=["POST"])
 def callback():
-    '''csrf_token_cookie = request.cookies.get('g_csrf_token')
-    if not csrf_token_cookie:
-        webapp2.abort(400, 'No CSRF token in Cookie.')
-    csrf_token_body = request.get('g_csrf_token')
-    if not csrf_token_body:
-        webapp2.abort(400, 'No CSRF token in post body.')
-    if csrf_token_cookie != csrf_token_body:
-        webapp2.abort(400, 'Failed to verify double submit cookie.')
-    '''
 
     token = request.form.get("credential")
 

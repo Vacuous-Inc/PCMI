@@ -1,3 +1,7 @@
+'''
+Code for controlling Users and interfacing between the flask app and the database
+'''
+
 from flask_login import UserMixin
 
 from db import get_user, new_user, is_admin as db_admin
