@@ -83,13 +83,13 @@ class Robot:
     #rotates arm to specified angle
     def rotate(theta,self):
         if theta == 0:
-            self.base.ChangeDutyCycle(3.5)
+            self.base.ChangeDutyCycle(5.4)
         elif theta == 1:
-            self.base.ChangeDutyCycle(3.5)
+            self.base.ChangeDutyCycle(3.7)
         elif theta == 2:
-            self.base.ChangeDutyCycle(7.5)  
+            self.base.ChangeDutyCycle(5.4)  
         elif theta == 3:
-            self.base.ChangeDutyCycle(11)   
+            self.base.ChangeDutyCycle(7)   
     
     #moves hand to specied point
     def move_to_coords(x,y,self):
@@ -109,7 +109,7 @@ class Robot:
         self.extend("c")
         self.pump.pickup()
         self.wrist.ChangeDutyCycle(3)
-        self.camera.read_deal(self.deck)
+        #self.camera.read_deal(self.deck)
         time.sleep(3)
         print(f"Dealt 1 card to {pos}")
         self.shoulder.ChangeDutyCycle(7.5)
