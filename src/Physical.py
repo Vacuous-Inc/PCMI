@@ -75,7 +75,7 @@ class Robot:
             self.elbow.start(5.3)
             self.wrist.start(7.15)
         elif r == "c":
-            self.shoulder.start(8.25)
+            self.shoulder.start(7.5)
             self.elbow.start(8)
             self.wrist.start(12)
 
