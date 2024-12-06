@@ -3,8 +3,8 @@ Class for interacting with the robotic arm, pumps, and camera
 '''
 
 from math import sqrt, atan
-#import RPi.GPIO as GPIO
-from RPiSim.GPIO import GPIO
+import RPi.GPIO as GPIO
+#from RPiSim.GPIO import GPIO
 import time
 import requests
 from Constants import CameraIP
@@ -37,10 +37,10 @@ class Robot:
         self.wrist = GPIO.PWM(self.wristPin, 50)
 
         #start PWM and set angle to 0
-        #self.base.start(2)
-        #self.shoulder.start(2)
-        #self.elbow.start(2)
-        #self.wrist.start(2)
+        self.base.start(5.4)
+        self.shoulder.start(6)
+        self.elbow.start(2)
+        self.wrist.start(7)
 
         self.baseTheta = 0
         self.shoulderTheta = 0
@@ -67,29 +67,29 @@ class Robot:
     def extend(self, r):
 
         if r == "p":
-            self.shoulder.ChangeDutyCycle(5.5)
-            self.elbow.ChangeDutyCycle(0)
-            self.wrist.ChangeDutyCycle(7)
+            self.shoulder.start(5.5)
+            self.elbow.start(2)
+            self.wrist.start(7)
         elif r == "d":
-            self.shoulder.ChangeDutyCycle(4.5)
-            self.elbow.ChangeDutyCycle(5.3)
-            self.wrist.ChangeDutyCycle(7.15)
+            self.shoulder.start(4.5)
+            self.elbow.start(5.3)
+            self.wrist.start(7.15)
         elif r == "c":
-            self.shoulder.ChangeDutyCycle(8.5)
-            self.elbow.ChangeDutyCycle(8.5)
-            self.wrist.ChangeDutyCycle(12)
+            self.shoulder.start(8.5)
+            self.elbow.start(7.5)
+            self.wrist.start(12)
 
 
     #rotates arm to specified angle
     def rotate(theta,self):
         if theta == 0:
-            self.base.ChangeDutyCycle(5.4)
+            self.base.start(5.4)
         elif theta == 1:
-            self.base.ChangeDutyCycle(3.7)
+            self.base.start(3.7)
         elif theta == 2:
-            self.base.ChangeDutyCycle(5.4)  
+            self.base.start(5.4)  
         elif theta == 3:
-            self.base.ChangeDutyCycle(7)   
+            self.base.start(7)   
     
     #moves hand to specied point
     def move_to_coords(x,y,self):
@@ -108,11 +108,11 @@ class Robot:
     def deal(self,pos):
         self.extend("c")
         self.pump.pickup()
-        self.wrist.ChangeDutyCycle(3)
+        self.wrist.start(3)
         #self.camera.read_deal(self.deck)
         time.sleep(3)
         print(f"Dealt 1 card to {pos}")
-        self.shoulder.ChangeDutyCycle(7.5)
+        self.shoulder.start(7.5)
         self.rotate(pos)
         if pos:
             self.extend("p")
