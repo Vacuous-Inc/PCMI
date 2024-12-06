@@ -70,13 +70,15 @@ class Robot:
     def extend(self, r):
 
         if r == "p":
+            self.wrist.start(7)
+            time.sleep(0.5)
             self.shoulder.start(5.5)
             self.elbow.start(2)
-            self.wrist.start(7)
         elif r == "d":
+            self.wrist.start(7.15)
+            time.sleep(0.5)
             self.shoulder.start(4.5)
             self.elbow.start(5.3)
-            self.wrist.start(7.15)
         elif r == "c":
             self.shoulder.start(8.5)
             self.elbow.start(8)
@@ -117,6 +119,8 @@ class Robot:
         self.pump.pickup()
         time.sleep(5)
         print("showing camera")
+        self.elbow.start(6)
+        self.shoulder.start(7)
         self.wrist.start(3)
         #self.camera.read_deal(self.deck)
         time.sleep(3)
