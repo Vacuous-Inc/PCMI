@@ -111,8 +111,12 @@ class Robot:
     #deals a card to correct location
     def deal(self,pos):
         self.extend("c")
+        print("extended")
+        time.sleep(5)
+        print("pump on")
         self.pump.pickup()
-        time.sleep(3)
+        time.sleep(5)
+        print("showing camera")
         self.wrist.start(3)
         #self.camera.read_deal(self.deck)
         time.sleep(3)
@@ -146,7 +150,7 @@ class Pump:
 
     def release(self):
         GPIO.output(4, GPIO.LOW)
-        GPIO.outpit(2, GPIO.LOW)
+        GPIO.output(2, GPIO.LOW)
 
 
 
