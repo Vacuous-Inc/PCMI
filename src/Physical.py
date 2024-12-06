@@ -75,9 +75,10 @@ class Robot:
             self.elbow.start(5.3)
             self.wrist.start(7.15)
         elif r == "c":
-            self.shoulder.start(7.5)
+            self.shoulder.start(8.5)
             self.elbow.start(8)
             self.wrist.start(12)
+            self.shoulder.start(8)
 
 
     #rotates arm to specified angle
@@ -131,17 +132,17 @@ class Pump:
         self.pumpPins = 2
         self.valvePin = 4
 
-        GPIO.setup(self.pumpPins, GPIO.OUT)
-        GPIO.setup(self.valvePin, GPIO.OUT)
+        GPIO.setup(2, GPIO.OUT)
+        GPIO.setup(4, GPIO.OUT)
     
     def pickup(self):
-        GPIO.output(self.valvePin, GPIO.HIGH)
-        GPIO.output(self.pumpPins, GPIO.HIGH)
+        GPIO.output(4, GPIO.HIGH)
+        GPIO.output(2, GPIO.HIGH)
         
 
     def release(self):
-        GPIO.output(self.valvePin, GPIO.LOW)
-        GPIO.outpit(self.pumpPins, GPIO.LOW)
+        GPIO.output(4, GPIO.LOW)
+        GPIO.outpit(2, GPIO.LOW)
 
 
 
