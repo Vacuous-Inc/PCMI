@@ -28,7 +28,7 @@ import json
 from db import init_db_command, db_error
 from User import User
 from Sockets import *
-#import Game
+from Constants import MainIP
 
 from random_username.generate import generate_username
 
@@ -72,7 +72,7 @@ def load_user(user_id):
 
 @app.route("/login")
 def login():
-    return render_template("login.html", client=GOOGLE_CLIENT_ID)
+    return render_template("login.html", client=GOOGLE_CLIENT_ID, ip=MainIP())
 
 '''
 @app.route("/login/google")

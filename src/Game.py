@@ -1,7 +1,7 @@
 '''
 Main code for integrating different components and running the game itself
 '''
-from Physical import Robot, Camera
+from Physical import Robot
 from flask_socketio import emit
 
 

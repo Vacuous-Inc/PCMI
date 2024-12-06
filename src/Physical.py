@@ -7,6 +7,7 @@ from math import sqrt, atan, acos, cos, sin
 from RPiSim.GPIO import GPIO
 import time
 import requests
+from Constants import CameraIP
 
 from Deck import Deck
 from Card import Card
@@ -36,10 +37,10 @@ class Robot:
         self.wrist = GPIO.PWM(self.wristPin, 50)
 
         #start PWM and set angle to 0
-        self.base.start(2)
-        self.shoulder.start(2)
-        self.elbow.start(2)
-        self.wrist.start(2)
+        #self.base.start(2)
+        #self.shoulder.start(2)
+        #self.elbow.start(2)
+        #self.wrist.start(2)
 
         self.baseTheta = 0
         self.shoulderTheta = 0
@@ -66,13 +67,17 @@ class Robot:
     def extend(self, r):
 
         if r == "p":
-            self.shoulder.ChangeDutyCycle(3.1)
-            self.elbow.ChangeDutyCycle(5.5)
-            self.wrist.ChangeDutyCycle(7.6)
+            self.shoulder.ChangeDutyCycle(5.5)
+            self.elbow.ChangeDutyCycle(0)
+            self.wrist.ChangeDutyCycle(7)
         elif r == "d":
-            self.shoulder.ChangeDutyCycle(3.5)
-            self.elbow.ChangeDutyCycle(8.7)
-            self.wrist.ChangeDutyCycle(7.5)
+            self.shoulder.ChangeDutyCycle(4.5)
+            self.elbow.ChangeDutyCycle(5.3)
+            self.wrist.ChangeDutyCycle(7.15)
+        elif r == "c":
+            self.shoulder.ChangeDutyCycle(8.5)
+            self.elbow.ChangeDutyCycle(8.5)
+            self.wrist.ChangeDutyCycle(12)
 
 
     #rotates arm to specified angle
@@ -80,9 +85,11 @@ class Robot:
         if theta == 0:
             self.base.ChangeDutyCycle(3.5)
         elif theta == 1:
-            self.base.ChangeDutyCycle(7.5)
+            self.base.ChangeDutyCycle(3.5)
         elif theta == 2:
-            self.base.ChangeDutyCycle(11)            
+            self.base.ChangeDutyCycle(7.5)  
+        elif theta == 3:
+            self.base.ChangeDutyCycle(11)   
     
     #moves hand to specied point
     def move_to_coords(x,y,self):
@@ -98,16 +105,22 @@ class Robot:
         self.pump.release()
 
     def deal(self,pos):
-        '''self.extend("d")
+        self.extend("c")
         self.pump.pickup()
-        self.wrist.ChangeDutyCycle(2)
-        time.sleep(1)
+        self.wrist.ChangeDutyCycle(3)
+        time.sleep(2)
         self.camera.read_deal(self.deck)
         print(f"Dealt 1 card to {pos}")
-        self.shoulder.ChangeDutyCycle(4)
-        self.extend("p")
-        self.pump.release()'''
+        self.shoulder.ChangeDutyCycle(7.5)
+        self.rotate(pos)
+        if pos:
+            self.extend("p")
+        else:
+            self.extend("d")
+        self.pump.release()
+        '''
         self.camera.read_deal(self.deck)
+        '''
         
 
 
@@ -121,7 +134,6 @@ class Pump:
         GPIO.setup(self.valvePin, GPIO.OUT)
     
     def pickup(self):
-        #TODO tune sleep values
         GPIO.output(self.valvePin, GPIO.HIGH)
         GPIO.output(self.pumpPins, GPIO.HIGH)
         
@@ -137,7 +149,7 @@ class Camera:
     def __init__(self):
         self.read = set()
         self.queue = []
-        self.cameraIP = "http://10.245.118.108:5000/data"
+        self.cameraIP = CameraIP()
 
     def get_deal(self, x):
         
